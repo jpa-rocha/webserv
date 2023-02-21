@@ -6,7 +6,7 @@
 /*   By: jrocha <jrocha@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/15 15:26:42 by jrocha            #+#    #+#             */
-/*   Updated: 2023/02/20 11:54:18 by jrocha           ###   ########.fr       */
+/*   Updated: 2023/02/21 11:47:30 by jrocha           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 			bool						_autoindex;
   			std::string					_root;
   			std::string					_index;
-  			std::vector<Location>		_location;                   
+  			std::vector<Location>		_location;              
 	};
 
 #endif

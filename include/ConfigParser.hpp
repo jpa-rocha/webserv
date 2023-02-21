@@ -6,7 +6,7 @@
 /*   By: jrocha <jrocha@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/15 14:09:47 by jrocha            #+#    #+#             */
-/*   Updated: 2023/02/20 13:40:52 by jrocha           ###   ########.fr       */
+/*   Updated: 2023/02/21 13:33:59 by jrocha           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,11 @@ static std::string config_variables[] = {"listen", "host", "server_name", "cgi_e
 
 class ConfigParser {
 	private:
-		Config config;
+		std::vector<Config> _config;
+		int					_n_servers;
 	public:
 		ConfigParser();
-		ConfigParser(std::string config);
+		ConfigParser(std::string config_file);
 		
 
 		// Getter
@@ -38,7 +39,8 @@ class ConfigParser {
 
 
 		// Error Handling
-		int exit_with_error(int err_code);
+		int exit_with_error(int err_code, std::ifstream& in_file);
+		bool check_server_context(std::ifstream& config_file, std::string& line);
 };
 		
 

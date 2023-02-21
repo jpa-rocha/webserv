@@ -6,7 +6,7 @@
 /*   By: jrocha <jrocha@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 09:38:31 by jrocha            #+#    #+#             */
-/*   Updated: 2023/02/20 13:59:57 by jrocha           ###   ########.fr       */
+/*   Updated: 2023/02/21 13:39:44 by jrocha           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,46 +15,54 @@
 ConfigParser::ConfigParser()
 {
 	std::ifstream in_file;
-	
+	this->_n_servers = 0;
+	// Check if config file exists
 	in_file.open("./webserv.config", std::ios::in);
-	if (in_file.fail() == true) {
-		// Class Error Handling
-		this->exit_with_error(1);
-	}
+	if (in_file.fail() == true)
+		this->exit_with_error(1, in_file);
 	
-	//getline(in_file, line)
-
-	//
-	/* std::string tmp;
-	int i = 1;
-	while (config_variables[i].size() > 0) {
-		std::getline(in_file, tmp); // this copies until the occurence '\n'
-		if (tmp.find(";") != 4294967295) // we have a line that contains key=>value
-		{
-			long unsigned int pos = tmp.find(config_variables[i++].data()); //gets the array element position of " " char occurrence
-			if (pos != 4294967295) {
-				pos = tmp.find(" ");
-				
-				//std::cout << "pos within if " << pos << std::endl; // testing the new value of pos
-				std::string hold = (tmp.data() + pos); // gets all the data from the index point (key + " ") and stores them to hold
-				
-				// test the output
-				std::cout << hold << std::endl;
-
-			//	function_to_
-				
-			}
-		} */
+	// Check if server context exists
+	std::string line;
+	while (line.size() == 0) 
+		getline(in_file, line);
+//	std::cout << line << std::endl;
+	if (this->check_server_context(in_file, line) == false)
+		this->exit_with_error(2, in_file);
+	in_file.close();
+	std::cout << line << std::endl;
 }
 	
+bool ConfigParser::check_server_context(std::ifstream& config_file, std::string& line)
+{
+	int context = 0;
+	if ((line.find("server") == std::string::npos || line.find("{") == std::string::npos) || 
+		((line.find("server") != std::string::npos && line.find("{") != std::string::npos) && line.find("}") != std::string::npos))
+		return false;
+	this->_n_servers += 1;
+	context += 1;
+	while (getline(config_file, line)) {
+		if (line.find("location") != std::string::npos && line.find("{") != std::string::npos)
+			context += 1;
+		if (line.find("}") != std::string::npos && context > 0)
+			context -= 1;
+	}
+	if (context == 0)
+		return true;
+	return false;
+}
 	
-	// At this point, We have the config file stored in in_file
-
-int ConfigParser::exit_with_error(int err_code)
+int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 {
 	if (err_code == 1) {
 		std::cout << RED << "--- Could not find default configuration file at: ./webserver.config ---" << RESET << std::endl;
+		in_file.close();
 		exit(1);
 	}
-	return 1;
+	else if (err_code == 2) {
+		std::cout << RED << "--- Could not find a valid ** server {} ** context";
+		std::cout <<		" in the provided configuration file ---" << RESET << std::endl;
+		in_file.close();
+		exit(2);
+	}
+	return EXIT_SUCCESS;
 }
