@@ -4,7 +4,7 @@ ConfigParser::ConfigParser()
 {
 	std::ifstream in_file;
 	
-	Config test = this->get_config();
+	Config test;
 	std::cout << test << std::endl;
 	
 	this->_n_servers = 0;
@@ -23,7 +23,7 @@ ConfigParser::ConfigParser()
 	//std::cout << line << std::endl;
 }
 
-Config& ConfigParser::get_config()
+Config ConfigParser::get_config()
 {
 	return this->_config[0];
 }

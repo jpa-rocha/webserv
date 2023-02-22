@@ -23,7 +23,7 @@ class ConfigParser {
 		
 
 		// Getter
-		Config& get_config();
+		Config get_config();
 
 		// Utils
 		std::string remove_comments(std::string line);
