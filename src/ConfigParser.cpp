@@ -6,7 +6,7 @@
 /*   By: jrocha <jrocha@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 09:38:31 by jrocha            #+#    #+#             */
-/*   Updated: 2023/02/22 09:54:48 by jrocha           ###   ########.fr       */
+/*   Updated: 2023/02/22 09:57:18 by jrocha           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,22 @@ bool ConfigParser::check_server_context(std::ifstream& config_file, std::string&
 	while (getline(config_file, line)) {
 		line = this->remove_comments(line);
 		std::cout << line << std::endl;
+		/*
+		
+		go into function and separate location config
+		keep track of context
+		
+		*/
 		if (line.find("location") != std::string::npos && line.find("{") != std::string::npos)
 			context += 1;
 		if (line.find("}") != std::string::npos && context > 0)
 			context -= 1;
 		
+		/*
+		
+		check line for values for Config
+		
+		*/	
 	}
 	if (context == 0)
 		return true;
