@@ -11,4 +11,11 @@
 # define CYAN    "\033[36m"
 # define WHITE   "\033[37m"
 
+#include <iostream>
+#include <string>
+#include <map>
+#include <iterator>
+#include "httpHeader.hpp"
+#include <fstream>
+
 #endif
