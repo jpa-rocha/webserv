@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <map>
-
+#include <iostream>
 #include "Location.hpp"
 
 	class Config {
@@ -44,6 +44,9 @@
   			void					set_index(std::string index);
   			void					set_location(std::vector<Location> location);
 
-	};
+			// Utils
 
+			
+	};
+	std::ostream& operator<<(std::ostream& os, Config& config);
 #endif

@@ -110,3 +110,19 @@ void					Config::set_location(std::vector<Location> location)
 {
 	this->_location = location;
 }
+
+std::ostream& operator<<(std::ostream& os, Config& config)
+{
+	os << config.get_port() << std::endl;
+	os << config.get_host() << std::endl;
+	//os << config.get_default_error() << std::endl;
+	os << config.get_server_name() << std::endl;
+	os << config.get_client_max_body_size() << std::endl;
+	os << config.get_root() << std::endl;
+	os << config.get_index() << std::endl;
+	return (os);
+/* os << this-> << std::endl;
+os << this-> << std::endl;
+	os << this-> << std::endl; */
+	
+}

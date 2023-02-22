@@ -3,6 +3,10 @@
 ConfigParser::ConfigParser()
 {
 	std::ifstream in_file;
+	
+	Config test = this->get_config();
+	std::cout << test << std::endl;
+	
 	this->_n_servers = 0;
 	// Check if config file exists
 	in_file.open("./webserv.config", std::ios::in);
@@ -17,6 +21,11 @@ ConfigParser::ConfigParser()
 	if (this->check_server_context(in_file, line) == false)
 		this->exit_with_error(2, in_file);
 	//std::cout << line << std::endl;
+}
+
+Config& ConfigParser::get_config()
+{
+	return this->_config[0];
 }
 
 
