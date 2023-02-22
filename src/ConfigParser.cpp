@@ -6,7 +6,7 @@
 /*   By: jrocha <jrocha@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 09:38:31 by jrocha            #+#    #+#             */
-/*   Updated: 2023/02/21 13:39:44 by jrocha           ###   ########.fr       */
+/*   Updated: 2023/02/22 09:54:48 by jrocha           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,29 +28,41 @@ ConfigParser::ConfigParser()
 //	std::cout << line << std::endl;
 	if (this->check_server_context(in_file, line) == false)
 		this->exit_with_error(2, in_file);
-	in_file.close();
-	std::cout << line << std::endl;
+	//std::cout << line << std::endl;
 }
-	
+
+
 bool ConfigParser::check_server_context(std::ifstream& config_file, std::string& line)
 {
 	int context = 0;
+	line = this->remove_comments(line);
 	if ((line.find("server") == std::string::npos || line.find("{") == std::string::npos) || 
 		((line.find("server") != std::string::npos && line.find("{") != std::string::npos) && line.find("}") != std::string::npos))
 		return false;
 	this->_n_servers += 1;
 	context += 1;
 	while (getline(config_file, line)) {
+		line = this->remove_comments(line);
+		std::cout << line << std::endl;
 		if (line.find("location") != std::string::npos && line.find("{") != std::string::npos)
 			context += 1;
 		if (line.find("}") != std::string::npos && context > 0)
 			context -= 1;
+		
 	}
 	if (context == 0)
 		return true;
 	return false;
 }
-	
+
+std::string ConfigParser::remove_comments(std::string line)
+{
+	if (line.find("#") != std::string::npos) {
+		line.erase(line.find("#"));
+	}
+	return line;
+}
+
 int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 {
 	if (err_code == 1) {

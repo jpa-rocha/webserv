@@ -6,7 +6,7 @@
 /*   By: jrocha <jrocha@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/15 14:09:47 by jrocha            #+#    #+#             */
-/*   Updated: 2023/02/21 13:33:59 by jrocha           ###   ########.fr       */
+/*   Updated: 2023/02/22 09:54:11 by jrocha           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,10 @@ class ConfigParser {
 		
 
 		// Getter
-		Config getConfig();
+		Config get_Config();
 
+		// Utils
+		std::string remove_comments(std::string line);
 
 		// Error Handling
 		int exit_with_error(int err_code, std::ifstream& in_file);
