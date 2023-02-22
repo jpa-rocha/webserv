@@ -6,10 +6,7 @@ Config::Config()
 	this->set_port(8001);
 	this->set_host(inet_addr("127.0.0.1"));
 	this->set_server_name("test");
-	std::map<int, std::string> test_map;
-	std::pair<short, std::string> p1 = std::make_pair(404, "/error/404.html");
-	test_map.insert(test_map.begin(), p1);
-	this->set_default_error(test_map);
+	this->set_default_error(404, "/error/404.html");
 	this->set_client_max_body_size(1024);
 	this->set_autoindex(false);
 	this->set_root("./root");
@@ -81,9 +78,10 @@ void					Config::set_server_name(std::string server_name)
 	this->_server_name = server_name;
 }
 
-void					Config::set_default_error(std::map<int, std::string> default_error)
+void					Config::set_default_error(int i, std::string default_error)
 {
-	this->_default_error = default_error;
+	std::pair<int, std::string> p = std::make_pair(i, default_error);
+	this->_default_error.insert(p);
 }
 
 void 					Config::set_client_max_body_size(int clien_max_body_size)

@@ -37,7 +37,7 @@
 			void					set_port(u_int16_t port);
 			void					set_host(in_addr_t host);                  
   			void					set_server_name(std::string server_name);
- 			void					set_default_error(std::map<int, std::string> default_error);
+ 			void					set_default_error(int i, std::string default_error);
   			void 					set_client_max_body_size(int clien_max_body_size);
 			void					set_autoindex(bool autoindex);
   			void					set_root(std::string root);
