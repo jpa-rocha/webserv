@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Chivo+Mono&family=Montserrat&family=Roboto&display=swap');
+*
+{
+	box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+body
+{
+	font-family: 'Roboto', sans-serif;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+/* header: logo and navbar */
+.header
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	background-color: #6492d2;
+	width: 100%;
+	padding: 20px;
+	height: auto;
+}
+
+/* styling the navigation */ 
+.navbar
+{
+	position: absolute;
+	top: 0;
+	right: 0;
+	flex: 1;
+}
+
+.nav-list
+{
+	list-style: none;
+	display: flex;
+    padding: 10px;
+	margin: 10px;
+	gap: 20px;
+	
+}
+
+.navbar a
+{
+	font-size: 18px;
+	color: #E5E7EB;
+	text-decoration: none;
+}
+
+.navbar a:hover
+{
+	color: aquamarine;
+}
+
+.logo a
+{
+	text-decoration: none;
+	color: #fff;
+}
+
+
+.intro-container
+{
+	background-color: #738b93;
+	width: 100%;
+	height: auto;
+	display: flex;
+	gap: 8em;
+	justify-content: center;
+	align-items: center;
+	padding: 50px;
+}
+
+
+.intro-text h2, 
+.intro-text p
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	
+}
+
+.intro-text h2
+{
+	font-size: 40px;
+	font-weight: 700;
+	color: #0d0d0c;
+}
+
+.intro-text p
+{
+	font-size: 18px;
+	color: #0d0d0c;
+}
+
+.intro-text button {
+	color: #F9FAF8;
+	background-color: #3882F6;
+	font-weight: 600;
+	padding: 7px 20px;
+	border-radius: 7px;
+	border: none;
+}
+
+.intro-text:hover button {
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+.intro-img img
+{
+	width: 500px;
+	height: auto;
+}
+
+
+

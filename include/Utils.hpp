@@ -17,5 +17,7 @@
 #include <iterator>
 #include "httpHeader.hpp"
 #include <fstream>
+#include <sys/socket.h>
+
 
 #endif

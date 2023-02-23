@@ -25,7 +25,7 @@ class httpHeader
 		std::map<std::string, std::string> _header;
 	public:
 		httpHeader();
-		httpHeader(int requestFd);
+		httpHeader(std::string header);
 		~httpHeader();
 		httpHeader(const httpHeader& copy);
 		httpHeader& operator=(const httpHeader& rhs);
@@ -36,16 +36,16 @@ class httpHeader
 		const std::map<std::string, std::string>& getHeader(std::string name) const;
 
 		void setHeader(std::string name, std::string value);
-		void setMethod(std::string method);
+		void setMethod(httpMethods method);
 		void setVersion(std::string version);
 
 		void printHeader();
-}
+};
 
 #endif
 
 /* 
-GET /home.html HTTP/1.1
+GET /home.html HTTP/1.1 \r\n
 Host: developer.mozilla.org
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9
