@@ -10,6 +10,8 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include "../include/httpHeader.hpp"
+
 #include <sstream>
 
 const int MAX_CONN = 5;
@@ -150,6 +152,7 @@ int main()
             if (fds[i].revents & (POLLIN | POLLERR))
             {
                 int n;
+                
                 if ((n = read(connfd, buf, sizeof(buf))) < 0)
                 {
                     if (errno != ECONNRESET)
@@ -167,6 +170,8 @@ int main()
                 {
                     //make object of class
 					//print function of class
+                    httpHeader request(buf);
+                    request.printHeader();
 					printf("%s", buf);
 					memset(buf, 0, 1024);
 					send_response(connfd, "Hello");
