@@ -18,7 +18,7 @@
 # define CLIENT_MAX_BODY "client_max_body_size"									  
 # define ROOT "root"
 # define INDEX "index"
-
+# define ALIAS "alias"
 # define AUTOINDEX "autoindex"
 # define RETURN "return"
 # define CGI_EXT "cgi_ext"
@@ -48,12 +48,14 @@ class ConfigParser {
 		int clean_autoindex(std::string line);
 		int clean_root(std::string line);
 		int clean_index(std::string line);
+		int clean_location(std::ifstream& config_file, std::string line);
 
 		// Utils
 		std::string remove_comments(std::string line);
 		std::string remove_end(std::string line, char symbol);
 		std::string find_int(std::string line);
-		int    toInt(std::string str);
+		std::string get_value(std::string line);
+		int    		toInt(std::string str);
 
 
 

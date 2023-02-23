@@ -17,6 +17,8 @@ ConfigParser::ConfigParser()
 //	std::cout << line << std::endl;
 	if (this->check_server_context(in_file) == false)
 		this->exit_with_error(this->get_error_code(), in_file);
+	test = this->get_config();
+	std::cout << GREEN << test << RESET << std::endl;
 }
 
 Config ConfigParser::get_config()
@@ -60,16 +62,16 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			this->clean_client_max_body_size(line);
 		else if (context && line.find(AUTOINDEX) != std::string::npos)
 			this->clean_autoindex(line);
-		//std::cout << GREEN << this->get_config().get_host() << RESET << std::endl;
-
 		/*
 		
 		go into function and separate location config
 		keep track of context
 		
 		*/
-		if (line.find("location") != std::string::npos && line.find("{") != std::string::npos)
+		if (line.find("location") != std::string::npos && line.find("{") != std::string::npos) {
 			context += 1;
+			this->clean_location(config_file, line);
+		}
 		if (line.find("}") != std::string::npos && context > 0)
 			context -= 1;
 		
@@ -134,7 +136,6 @@ int ConfigParser::clean_error_page(std::string line)
 	line = this->find_int(line);
 	if (line.size() == 0)
 		return 5;
-	std::cout << PURPLE << line << RESET << std::endl;
 	std::size_t pos = line.find_first_of("/");
 	std::string path = &line[pos];
 	pos = line.find_first_of(" ");
@@ -146,15 +147,7 @@ int ConfigParser::clean_error_page(std::string line)
 
 int ConfigParser::clean_server_name(std::string line)
 {
-	line = this->remove_end(line, ';');	
-	size_t pos = line.find_first_not_of(" \r\t\b\f");
-	pos = line.find_first_of(" \r\t\b\f", pos);
-	pos = line.find_first_not_of(" \r\t\b\f", pos);
-	line.erase(0, pos);
-	pos = line.find_first_of(" \r\t\b\f");
-	if (pos != std::string::npos)
-		line.erase(pos);
-	std::cout << line << std::endl;
+	line = this->get_value(line);
 	this->get_config().set_server_name(line);
 	return EXIT_SUCCESS;
 }
@@ -182,19 +175,56 @@ int ConfigParser::clean_autoindex(std::string line)
 
 int ConfigParser::clean_root(std::string line)
 {
-	line = this->remove_end(line, ';');	
-	size_t pos = line.find_first_not_of(" \r\t\b\f");
-	pos = line.find_first_of(" \r\t\b\f", pos);
-	pos = line.find_first_not_of(" \r\t\b\f", pos);
-	line.erase(0, pos);
-	pos = line.find_first_of(" \r\t\b\f");
-	if (pos != std::string::npos)
-		line.erase(pos);
+	line = this->get_value(line);
 	this->get_config().set_root(line);
 	return EXIT_SUCCESS;
 }
 
 int ConfigParser::clean_index(std::string line)
+{
+	line = this->get_value(line);
+	this->get_config().set_index(line);
+	return EXIT_SUCCESS;
+}
+
+int ConfigParser::clean_location(std::ifstream& config_file, std::string line)
+{
+	int flag = 0;
+	Location location;
+	std::string key = this->get_value(line);
+
+	if (line.find("cgi-bin") != std::string::npos) {
+		CGI location;
+		flag = 1;
+	}
+
+	int	exit_context = 0;
+	while (exit_context == 0 && getline(config_file, line)) {
+		if (line.find("}") != std::string::npos)
+			exit_context = 1;
+		if (line.find(ROOT) != std::string::npos)
+			location.set_root(this->get_value(line));
+		else if (flag == 0) {
+			if (line.find(AUTOINDEX) != std::string::npos)
+			if (line.find(ALLOW_METHODS) != std::string::npos)
+			if (line.find(INDEX) != std::string::npos)
+				location.set_index(this->get_value(line));
+			if (line.find(ALIAS) != std::string::npos)
+				location.set_alias(this->get_value(line));
+			if (line.find(RETURN) != std::string::npos)
+				location.set_redirection(this->get_value(line));
+		}
+		else {
+			if (line.find(CGI_PATH) != std::string::npos)
+			if (line.find(CGI_EXT) != std::string::npos)
+		}
+		
+	}
+	// location here/ {
+	return 0;
+}
+
+std::string ConfigParser::get_value(std::string line)
 {
 	line = this->remove_end(line, ';');	
 	size_t pos = line.find_first_not_of(" \r\t\b\f");
@@ -204,11 +234,8 @@ int ConfigParser::clean_index(std::string line)
 	pos = line.find_first_of(" \r\t\b\f");
 	if (pos != std::string::npos)
 		line.erase(pos);
-	this->get_config().set_index(line);
-	return EXIT_SUCCESS;
+	return line;
 }
-
-std::string ConfigParser::get_value()
 
 int    ConfigParser::toInt(std::string str)
 {

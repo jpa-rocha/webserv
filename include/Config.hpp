@@ -6,32 +6,35 @@
 #include <map>
 #include <iostream>
 #include "Location.hpp"
+#include "CGI.hpp"
 
 	class Config {
 		private:
-			uint16_t					_port;
-  			in_addr_t					_host;                  
-  			std::string					_server_name;
- 			std::map<int, std::string>	_default_error;
-  			int 						_client_max_body_size;
-			bool						_autoindex;
-  			std::string					_root;
-  			std::string					_index;
-  			std::vector<Location>		_location;
+  			int 								_client_max_body_size;
+			bool								_autoindex;
+			uint16_t							_port;
+  			in_addr_t							_host;                  
+  			std::string							_server_name;
+  			std::string							_root;
+  			std::string							_index;
+ 			std::map<int, std::string>			_default_error;
+  			std::map<std::string, Location>		_location;
+			CGI									_cgi;
 		public:
 			Config();
 			Config(bool test);
+			Config& operator=(const Config& obj);
 
 			// getters
-			u_int16_t					get_port();
-			in_addr_t					get_host();                  
-  			std::string					get_server_name();
- 			std::map<int, std::string>	get_default_error();
-  			int 						get_client_max_body_size();
-			bool						get_autoindex();
-  			std::string					get_root();
-  			std::string					get_index();
-  			std::vector<Location>		get_location();
+			u_int16_t							get_port();
+			in_addr_t							get_host();                  
+  			std::string							get_server_name();
+ 			std::map<int, std::string>			get_default_error();
+  			int 								get_client_max_body_size();
+			bool								get_autoindex();
+  			std::string							get_root();
+  			std::string							get_index();
+  			std::map<std::string, Location>		get_location();
 
 			// setters
 			void					set_port(u_int16_t port);
@@ -42,7 +45,7 @@
 			void					set_autoindex(bool autoindex);
   			void					set_root(std::string root);
   			void					set_index(std::string index);
-  			void					set_location(std::vector<Location> location);
+  			void					set_location(std::map<std::string, Location> location);
 
 			// Utils
 

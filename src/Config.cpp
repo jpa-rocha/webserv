@@ -14,6 +14,21 @@ Config::Config()
 
 }
 
+Config &Config::operator=(const Config& obj)
+{
+	if (this != &obj) {
+		
+		this->_port = obj._port;
+		this->_host = obj._host;
+		this->_server_name = obj._server_name;
+		this->_default_error = obj._default_error;
+		this->_client_max_body_size = obj._client_max_body_size;
+		this->_autoindex = obj._autoindex;
+		this->_root = obj._root;
+		this->_index = obj._index;
+	}
+	return *this;
+}
 // Getters
 
 u_int16_t					Config::get_port()
@@ -56,7 +71,7 @@ std::string					Config::get_index()
 	return this->_index;
 }
 
-std::vector<Location>		Config::get_location()
+std::map<std::string, Location>		Config::get_location()
 {
 	return this->_location;
 }
@@ -104,7 +119,7 @@ void					Config::set_index(std::string index)
 	this->_index = index;
 }
 
-void					Config::set_location(std::vector<Location> location)
+void					Config::set_location(std::map<std::string, Location> location)
 {
 	this->_location = location;
 }
