@@ -5,6 +5,17 @@ CGI::CGI()
 	this->_root = "";
 }
 
+CGI& CGI::operator=(const CGI& obj)
+{
+	if (this != &obj) {
+		this->_root = obj._root;
+		this->_path = obj._path;
+		this->_ext = obj._ext;
+	}
+	return *this;
+}
+
+
 std::string									CGI::get_root()
 {
 	return this->_root;

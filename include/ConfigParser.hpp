@@ -33,10 +33,11 @@ class ConfigParser {
 	public:
 		ConfigParser();
 		ConfigParser(std::string config_file);
+		~ConfigParser();
 		
 
 		// Getter
-		Config get_config();
+		Config& get_config(int i);
 		int get_error_code();
 
 		//
@@ -55,8 +56,8 @@ class ConfigParser {
 		void clean_cgi(std::ifstream& config_file, std::string line);
 		
 		void clean_methods(std::string line);
-		void clean_cgi_path(std::string line);
-		void clean_cgi_ext(std::string line);
+		void clean_cgi_path(std::string line, CGI *cgi);
+		void clean_cgi_ext(std::string line, CGI *cgi);
 		bool clean_loc_autoindex(std::string line);
 
 
@@ -66,6 +67,7 @@ class ConfigParser {
 		std::string find_int(std::string line);
 		std::string get_value(std::string line);
 		int    		to_int(std::string str);
+		bool 		check_def_format(std::string def, std::string line);
 
 
 

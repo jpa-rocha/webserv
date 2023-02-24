@@ -12,9 +12,10 @@ int main (int argc, char** argv)
 		
 	}
 	else {
-		ConfigParser();
+		ConfigParser config;
 		
 		// run default config file	
+		std::cout << GREEN << config.get_config(0) << RESET << std::endl;
 	}
 	
 	return EXIT_SUCCESS;

@@ -13,6 +13,7 @@ class CGI {
 		std::vector<std::string>				_ext; 
 	public:
 		CGI();
+		CGI& operator=(const CGI& obj);
 		// Setters
 		void set_root(std::string root);
 		void set_path(std::string program, std::string path);

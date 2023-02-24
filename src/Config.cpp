@@ -11,13 +11,16 @@ Config::Config()
 	this->set_autoindex(false);
 	this->set_root("./root");
 	this->set_index("./root/index.html");
+}
 
+Config::Config(const Config& obj)
+{
+	*this = obj;
 }
 
 Config &Config::operator=(const Config& obj)
 {
 	if (this != &obj) {
-		
 		this->_port = obj._port;
 		this->_host = obj._host;
 		this->_server_name = obj._server_name;
@@ -31,52 +34,52 @@ Config &Config::operator=(const Config& obj)
 }
 // Getters
 
-u_int16_t					Config::get_port()
+u_int16_t					&Config::get_port()
 {
 	return this->_port;
 }
 
-in_addr_t					Config::get_host()
+in_addr_t					&Config::get_host()
 {
 	return this->_host;
 }
 
-std::string					Config::get_server_name()
+std::string					&Config::get_server_name()
 {
 	return this->_server_name;
 }
 
-std::map<int, std::string>	Config::get_default_error()
+std::map<int, std::string>	&Config::get_default_error()
 {
 	return this->_default_error;
 }
 
-int 						Config::get_client_max_body_size()
+int 						&Config::get_client_max_body_size()
 {
 	return this->_client_max_body_size;
 }
 
-bool						Config::get_autoindex()
+bool						&Config::get_autoindex()
 {
 	return this->_autoindex;
 }
 
-std::string					Config::get_root()
+std::string					&Config::get_root()
 {
 	return this->_root;
 }
 
-std::string					Config::get_index()
+std::string					&Config::get_index()
 {
 	return this->_index;
 }
 
-std::map<std::string, Location>		Config::get_location()
+std::map<std::string, Location>		&Config::get_location()
 {
 	return this->_location;
 }
 
-CGI									Config::get_cgi()
+CGI									&Config::get_cgi()
 {
 	return this->_cgi;
 }
@@ -124,9 +127,15 @@ void					Config::set_index(std::string index)
 	this->_index = index;
 }
 
-void					Config::set_location(std::map<std::string, Location> location)
+void					Config::set_location(std::string key, Location location)
 {
-	this->_location = location;
+	std::pair<std::string, Location> p = std::make_pair(key, location);
+	this->_location.insert(p);
+}
+
+void					Config::set_cgi(CGI cgi)
+{
+	this->_cgi = cgi;
 }
 
 std::ostream& operator<<(std::ostream& os, Config& config)
@@ -143,4 +152,9 @@ std::ostream& operator<<(std::ostream& os, Config& config)
 os << this-> << std::endl;
 	os << this-> << std::endl; */
 	
+}
+
+Config::~Config()
+{
+
 }
