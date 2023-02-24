@@ -44,16 +44,16 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 {
 	std::string line;
 	int context = 0;
+
 	while (getline(config_file, line) && this->get_error_code() == 0) {
 		line = this->remove_comments(line);
-		size_t pos = line.find_first_not_of(" \r\t\b\f");
-		if (pos == std::string::npos)
+		if (line.find_first_not_of(" \r\t\b\f") == std::string::npos)
 			continue;
 		
 		// TODO server should be the top element
-		if ((line.find("server") != std::string::npos && line.find("{") != std::string::npos) && line.find("}") != std::string::npos)
+		if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && line.find("}") != std::string::npos)
 			return false;
-		else if ((line.find("server") != std::string::npos && line.find("{") != std::string::npos) && context == 0) {
+		else if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && context == 0) {
 			this->_n_servers += 1;
 			context += 1;
 			this->_config.push_back(Config());
@@ -82,8 +82,8 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			context += 1;
 			if (line.find("cgi-bin") != std::string::npos)
 				this->clean_cgi(config_file, line);
-			else
-				this->clean_location(config_file, line);
+			// else
+			// 	this->clean_location(config_file, line);
 		}
 		if (line.find("}") != std::string::npos && context > 0)
 			context -= 1;
@@ -94,6 +94,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 		
 		*/	
 	}
+	std::cout << this->get_config(0).get_cgi() << std::endl;
 	if (context == 0 && this->get_error_code() == 0)
 		return true;
 	return false;
@@ -208,7 +209,7 @@ void ConfigParser::clean_location(std::ifstream& config_file, std::string line)
 			location.set_root(this->get_value(line));
 		if ((line.find(AUTOINDEX) != std::string::npos) && this->check_def_format(AUTOINDEX, line))
 			location.set_autoindex(this->clean_loc_autoindex(line));
-		if ((line.find(ALLOW_METHODS) != std::string::npos)  && this->check_def_format(ALLOW_METHODS, line)) {}
+		//if ((line.find(ALLOW_METHODS) != std::string::npos)  && this->check_def_format(ALLOW_METHODS, line)) {}
 		// TODO clean methods
 			//location.set_methods();
 		if ((line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
@@ -227,7 +228,7 @@ void ConfigParser::clean_location(std::ifstream& config_file, std::string line)
 void ConfigParser::clean_cgi(std::ifstream& config_file, std::string line)
 {
 	int	exit_context = 0;
-	CGI	*cgi = &this->get_config(this->_n_servers - 1).get_cgi();
+	CGI	*cgi = &this->_config[this->_n_servers - 1].get_cgi();
 
 	while (!exit_context && getline(config_file, line)) {
 		if (line.find("}") != std::string::npos)
@@ -258,8 +259,8 @@ void				ConfigParser::clean_methods(std::string line)
 
 void									ConfigParser::clean_cgi_path(std::string line, CGI *cgi)
 {
-	std::string temp;
-	std::string temp2;
+	std::string *temp;
+	std::string *temp2;
 	size_t pos = 0;
 	size_t pos2 = 0;
 	size_t pos3 = 0;
@@ -268,13 +269,16 @@ void									ConfigParser::clean_cgi_path(std::string line, CGI *cgi)
 	pos = line.find_first_of(" \r\t\b\f", pos);
 	pos = line.find_first_not_of(" \r\t\b\f", pos);
 	while (pos != std::string::npos) {
-		pos = line.find_first_not_of(" \r\t\b\f", pos);
+		temp = new std::string;
+		temp2 = new std::string;
 		pos3 = line.find_first_of(" \r\t\b\f", pos);
 		pos2 = line.find_last_of("/", pos3);
-		temp = line.substr(pos2 + 1, pos3 - pos2 - 1);
-		temp2 = line.substr(pos, pos2 + 1 - pos + temp.size());
+		*temp =  line.substr(pos2 + 1, pos3 - pos2 - 1);
+		*temp2 = line.substr(pos, pos2 + 1 - pos + (*temp).size());
+		std::cout << *temp << std::endl;
+		std::cout << *temp2 << std::endl;
 		cgi->set_path(temp, temp2);
-		pos = pos3;
+		pos = line.find_first_not_of(" \r\t\b\f", pos3);
 	}
 	if (cgi->get_path().empty())
 		this->set_error_code(14);
