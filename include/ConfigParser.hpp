@@ -39,23 +39,33 @@ class ConfigParser {
 		Config get_config();
 		int get_error_code();
 
+		//
+		void set_error_code(int error_code);
+
 		// Cleaners
-		int clean_listen(std::string line);
-		int clean_host(std::string line);
-		int clean_error_page(std::string line);
-		int clean_server_name(std::string line);
-		int clean_client_max_body_size(std::string line);
-		int clean_autoindex(std::string line);
-		int clean_root(std::string line);
-		int clean_index(std::string line);
-		int clean_location(std::ifstream& config_file, std::string line);
+		void clean_listen(std::string line);
+		void clean_host(std::string line);
+		void clean_error_page(std::string line);
+		void clean_server_name(std::string line);
+		void clean_client_max_body_size(std::string line);
+		void clean_autoindex(std::string line);
+		void clean_root(std::string line);
+		void clean_index(std::string line);
+		void clean_location(std::ifstream& config_file, std::string line);
+		void clean_cgi(std::ifstream& config_file, std::string line);
+		
+		void clean_methods(std::string line);
+		void clean_cgi_path(std::string line);
+		void clean_cgi_ext(std::string line);
+		bool clean_loc_autoindex(std::string line);
+
 
 		// Utils
 		std::string remove_comments(std::string line);
 		std::string remove_end(std::string line, char symbol);
 		std::string find_int(std::string line);
 		std::string get_value(std::string line);
-		int    		toInt(std::string str);
+		int    		to_int(std::string str);
 
 
 

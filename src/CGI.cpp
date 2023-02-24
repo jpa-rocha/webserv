@@ -2,12 +2,7 @@
 
 CGI::CGI()
 {
-
-}
-
-CGI::~CGI()
-{
-
+	this->_root = "";
 }
 
 std::string									CGI::get_root()
@@ -30,9 +25,10 @@ void										CGI::set_root(std::string root)
 	this->_root = root;
 }
 
-void										CGI::set_path(std::map<std::string, std::string> path)
+void										CGI::set_path(std::string program, std::string path)
 {
-	this->_path = path;
+	std::pair<std::string, std::string> p = std::make_pair(program, path);
+	this->_path.insert(p);
 }
 
 void										CGI::set_ext(std::vector<std::string> ext)
@@ -43,7 +39,7 @@ void										CGI::set_ext(std::vector<std::string> ext)
 std::ostream &operator<<(std::ostream &os, CGI &cgi)
 {
 	os << cgi.get_root() << std::endl;
-	os << cgi.get_path() << std::endl;
-	os << cgi.get_ext() << std::endl;
+	//os << cgi.get_path() << std::endl;
+	//os << cgi.get_ext() << std::endl;
 	return os;
 }

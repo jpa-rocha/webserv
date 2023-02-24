@@ -76,6 +76,11 @@ std::map<std::string, Location>		Config::get_location()
 	return this->_location;
 }
 
+CGI									Config::get_cgi()
+{
+	return this->_cgi;
+}
+
 // Setters
 
 void					Config::set_port(u_int16_t port)

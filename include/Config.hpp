@@ -35,6 +35,7 @@
   			std::string							get_root();
   			std::string							get_index();
   			std::map<std::string, Location>		get_location();
+			CGI									get_cgi();
 
 			// setters
 			void					set_port(u_int16_t port);

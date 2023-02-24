@@ -17,6 +17,7 @@
 
 		public:
 
+			Location();
 			// Setters   
 			void set_root(std::string root);
 			void set_autoindex(bool autoindex);

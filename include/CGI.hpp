@@ -12,10 +12,10 @@ class CGI {
 		std::map<std::string, std::string>		_path;
 		std::vector<std::string>				_ext; 
 	public:
-
+		CGI();
 		// Setters
 		void set_root(std::string root);
-		void set_path(std::map<std::string, std::string> path);
+		void set_path(std::string program, std::string path);
 		void set_ext(std::vector<std::string> ext);
 
 		// Getters
