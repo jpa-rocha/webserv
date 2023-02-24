@@ -42,9 +42,9 @@ void										CGI::set_path(std::string program, std::string path)
 	this->_path.insert(p);
 }
 
-void										CGI::set_ext(std::vector<std::string> ext)
+void										CGI::set_ext(std::string ext)
 {
-	this->_ext = ext;
+	this->_ext.push_back(ext);
 }
 
 std::ostream &operator<<(std::ostream &os, CGI &cgi)

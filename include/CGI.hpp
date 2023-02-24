@@ -17,7 +17,7 @@ class CGI {
 		// Setters
 		void set_root(std::string root);
 		void set_path(std::string program, std::string path);
-		void set_ext(std::vector<std::string> ext);
+		void set_ext(std::string ext);
 
 		// Getters
 		std::string								get_root();

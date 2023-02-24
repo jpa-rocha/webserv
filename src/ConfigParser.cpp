@@ -263,7 +263,6 @@ void									ConfigParser::clean_cgi_path(std::string line, CGI *cgi)
 	size_t pos = 0;
 	size_t pos2 = 0;
 	size_t pos3 = 0;
-
 	line = this->remove_end(line, ';');
 	pos = line.find_first_not_of(" \r\t\b\f", pos);
 	pos = line.find_first_of(" \r\t\b\f", pos);
@@ -283,7 +282,6 @@ void									ConfigParser::clean_cgi_path(std::string line, CGI *cgi)
 
 void			ConfigParser::clean_cgi_ext(std::string line, CGI *cgi)
 {
-	std::vector<std::string> to_add;
 	size_t pos = 0;
 	size_t pos2 = 0;
 
@@ -294,10 +292,9 @@ void			ConfigParser::clean_cgi_ext(std::string line, CGI *cgi)
 	while (pos != std::string::npos) {
 		pos = line.find_first_not_of(" \r\t\b\f", pos);
 		pos2 = line.find_first_of(" \r\t\b\f", pos);
-		to_add.push_back(line.substr(pos, pos2 - 1));
+		cgi->set_ext(line.substr(pos, pos2 - 1));
 		pos = pos2;
 	}
-	cgi->set_ext(to_add);
 	if (cgi->get_path().empty())
 		this->set_error_code(14);
 }
