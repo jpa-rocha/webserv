@@ -13,7 +13,8 @@ int main (int argc, char** argv)
 	}
 	else {
 		ConfigParser config;
-		
+		if (config.get_error_code() != 0)
+			return EXIT_FAILURE;
 		// run default config file	
 		std::cout << GREEN << config.get_config(0) << RESET << std::endl;
 	}

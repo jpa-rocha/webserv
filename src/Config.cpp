@@ -133,7 +133,7 @@ void					Config::set_location(std::string key, Location location)
 	this->_location.insert(p);
 }
 
-void					Config::set_cgi(CGI cgi)
+void					Config::set_cgi(CGI &cgi)
 {
 	this->_cgi = cgi;
 }

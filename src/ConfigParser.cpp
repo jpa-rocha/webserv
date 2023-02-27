@@ -50,7 +50,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 		if (line.find_first_not_of(" \r\t\b\f") == std::string::npos)
 			continue;
 		
-		// TODO server should be the top element
+		// // TODO server should be the top element
 		if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && line.find("}") != std::string::npos)
 			return false;
 		else if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && context == 0) {
@@ -82,8 +82,8 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			context += 1;
 			if (line.find("cgi-bin") != std::string::npos)
 				this->clean_cgi(config_file, line);
-			// else
-			// 	this->clean_location(config_file, line);
+			else
+				this->clean_location(config_file, line);
 		}
 		if (line.find("}") != std::string::npos && context > 0)
 			context -= 1;
@@ -94,7 +94,14 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 		
 		*/	
 	}
-	std::cout << this->get_config(0).get_cgi() << std::endl;
+	//std::cout << _n_servers << std::endl;
+	//std::cout << this->get_config(0).get_cgi() << std::endl;
+	std::cout << "output" << std::endl;
+	std::cout << this->get_config(0).get_cgi().get_path().at("python3") << std::endl;
+	std::cout << this->get_config(0).get_cgi().get_path().at("bash") << std::endl;
+	std::cout << this->get_config(0).get_cgi().get_ext().at(0) << std::endl;
+	std::cout << this->get_config(0).get_cgi().get_ext().at(1) << std::endl;
+	std::cout << this->get_config(0).get_cgi().get_root() << std::endl;
 	if (context == 0 && this->get_error_code() == 0)
 		return true;
 	return false;
@@ -228,20 +235,22 @@ void ConfigParser::clean_location(std::ifstream& config_file, std::string line)
 void ConfigParser::clean_cgi(std::ifstream& config_file, std::string line)
 {
 	int	exit_context = 0;
-	CGI	*cgi = &this->_config[this->_n_servers - 1].get_cgi();
+	CGI	cgi;
 
 	while (!exit_context && getline(config_file, line)) {
 		if (line.find("}") != std::string::npos)
 			exit_context = 1;
 		if ((line.find(ROOT) != std::string::npos) && this->check_def_format(ROOT, line))
-			cgi->set_root(this->get_value(line));
+			cgi.set_root(this->get_value(line));
 		else if ((line.find(CGI_PATH) != std::string::npos) && this->check_def_format(CGI_PATH, line))
 			this->clean_cgi_path(line, cgi);
 		else if ((line.find(CGI_EXT) != std::string::npos) && this->check_def_format(CGI_EXT, line))
 			this->clean_cgi_ext(line, cgi);
 	}
-	if (!exit_context || (cgi->get_path().empty() || cgi->get_ext().empty() || cgi->get_root().empty()))
+	if (!exit_context || (cgi.get_path().empty() || cgi.get_ext().empty() || cgi.get_root().empty()))
 		this->set_error_code(12);
+	std::cout << "before copy construct" << std::endl;
+	this->_config[this->_n_servers - 1].set_cgi(cgi);
 }
 
 bool 								ConfigParser::clean_loc_autoindex(std::string line)
@@ -257,10 +266,10 @@ void				ConfigParser::clean_methods(std::string line)
 	// this->set_error_code(13);
 }
 
-void									ConfigParser::clean_cgi_path(std::string line, CGI *cgi)
+void									ConfigParser::clean_cgi_path(std::string line, CGI &cgi)
 {
-	std::string *temp;
-	std::string *temp2;
+	std::string temp;
+	std::string temp2;
 	size_t pos = 0;
 	size_t pos2 = 0;
 	size_t pos3 = 0;
@@ -269,22 +278,18 @@ void									ConfigParser::clean_cgi_path(std::string line, CGI *cgi)
 	pos = line.find_first_of(" \r\t\b\f", pos);
 	pos = line.find_first_not_of(" \r\t\b\f", pos);
 	while (pos != std::string::npos) {
-		temp = new std::string;
-		temp2 = new std::string;
 		pos3 = line.find_first_of(" \r\t\b\f", pos);
 		pos2 = line.find_last_of("/", pos3);
-		*temp =  line.substr(pos2 + 1, pos3 - pos2 - 1);
-		*temp2 = line.substr(pos, pos2 + 1 - pos + (*temp).size());
-		std::cout << *temp << std::endl;
-		std::cout << *temp2 << std::endl;
-		cgi->set_path(temp, temp2);
+		temp =  line.substr(pos2 + 1, pos3 - pos2 - 1);
+		temp2 = line.substr(pos, pos2 + 1 - pos + (temp).size());
+		cgi.set_path(temp, temp2);
 		pos = line.find_first_not_of(" \r\t\b\f", pos3);
 	}
-	if (cgi->get_path().empty())
+	if (cgi.get_path().empty())
 		this->set_error_code(14);
 }
 
-void			ConfigParser::clean_cgi_ext(std::string line, CGI *cgi)
+void			ConfigParser::clean_cgi_ext(std::string line, CGI &cgi)
 {
 	size_t pos = 0;
 	size_t pos2 = 0;
@@ -296,10 +301,10 @@ void			ConfigParser::clean_cgi_ext(std::string line, CGI *cgi)
 	while (pos != std::string::npos) {
 		pos = line.find_first_not_of(" \r\t\b\f", pos);
 		pos2 = line.find_first_of(" \r\t\b\f", pos);
-		cgi->set_ext(line.substr(pos, pos2 - 1));
+		cgi.set_ext(line.substr(pos, pos2 - 1));
 		pos = pos2;
 	}
-	if (cgi->get_path().empty())
+	if (cgi.get_path().empty())
 		this->set_error_code(14);
 }
 
@@ -365,5 +370,5 @@ int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 	else if (err_code == 14)
 		std::cout << RED << NO_VALID_CGI_PATH << RESET << std::endl;
 	in_file.close();
-	exit(err_code);
+	return(err_code);
 }

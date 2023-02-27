@@ -49,7 +49,7 @@
   			void					set_root(std::string root);
   			void					set_index(std::string index);
   			void					set_location(std::string key, Location location);
-			void					set_cgi(CGI cgi);
+			void					set_cgi(CGI &cgi);
 
 			// Utils
 
