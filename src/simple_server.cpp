@@ -9,10 +9,11 @@
 #include <poll.h>
 #include <errno.h>
 #include <stdio.h>
-
-#include "../include/httpHeader.hpp"
-
 #include <sstream>
+#include "../include/Utils.hpp"
+#include "../include/httpHeader.hpp"
+#include "../include/ConfigParser.hpp"
+
 
 const int MAX_CONN = 5;
 
@@ -31,7 +32,7 @@ void send_response(int client_socket, const std::string& path)
     
     respond_path = "docs/www" + respond_path;
 
-    std::ifstream file(respond_path);
+    std::ifstream file(respond_path.c_str());
     if (!file.is_open())
     {
         // if the file cannot be opened, send a 404 error
@@ -73,10 +74,36 @@ void send_response(int client_socket, const std::string& path)
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
-    int sockfd;
-    int port = 8084;
+(void) argv;
+    if (argc > 2) {
+		// too many arguments
+	}
+	ConfigParser config;
+
+	// if (argc == 2) {
+	// 	// error check and config parse
+	// }
+	// else {
+	// 	if (config.get_error_code() != 0)
+	// 		return EXIT_FAILURE;
+	// 	if (config.get_error_code() != 0)
+	// 		return EXIT_FAILURE;
+	// 	Config configs = config.get_config(0);
+	// 	//for (int i = 0; i < config.get_n_servers(); i++)
+	// 	//	OurServer(config.get_config(i));
+	// 	// run default config file	
+	std::cout << GREEN << config.get_config(0) << RESET << std::endl;
+    config.get_config(0).get_cgi().get_root()
+    return (0);
+	//}
+	
+
+	//return EXIT_SUCCESS;
+    int sockfd[config.get_n_servers()];
+	//int port = config.get_config(0).get_port()
+    int port[config.get_n_servers()];
     char buf[1024];
 
     //Create socket
@@ -94,15 +121,18 @@ int main()
         return 1;
     }
 
+    struct sockaddr_in serv_addr[config.get_n_servers()];
     //Bind socket to port
-    struct sockaddr_in serv_addr;
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    for (int i = 0; i < config.get_n_servers(); i++)
     {
-        perror("bind");
-        return 1;
+        serv_addr[i].sin_family = AF_INET;
+        serv_addr[i].sin_port = htons(port[i]);
+        serv_addr[i].sin_addr.s_addr = htonl(INADDR_ANY);
+        if (bind(sockfd[i], (struct sockaddr *)&serv_addr[i], sizeof(serv_addr[i])) < 0)
+        {
+            perror("bind");
+            return 1;
+        }
     }
 
     //Listen on socket
@@ -113,13 +143,16 @@ int main()
     }
 
     //initialize poll
-    struct pollfd fds[MAX_CONN];
-    fds[0].fd = sockfd;
-    fds[0].events = POLLIN;
+    struct pollfd fds[config.get_n_servers()][MAX_CONN];
 
-    for (int i = 1; i < MAX_CONN; i++)
+    for (int j = 0; j < config.get_n_servers(); j++)
     {
-        fds[i].fd = -1;
+        fds[j][0].fd = sockfd[j];
+        fds[j][0].events = POLLIN;
+        for (int i = 1; i < MAX_CONN; i++)
+        {
+            fds[j][i].fd = -1;
+        }
     }
 
     int nfds = 1;

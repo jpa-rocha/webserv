@@ -3,7 +3,18 @@
 
 # include "Utils.hpp"
 
-
+enum httpMethods 
+{
+	GET,
+	POST,
+	DELETE,
+	PUT,
+	HEAD,
+	OPTIONS,
+	TRACE,
+	CONNECT,
+	NONE
+};
 
 class httpHeader
 {

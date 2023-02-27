@@ -147,7 +147,7 @@ std::ostream& operator<<(std::ostream& os, Config& config)
 	os << config.get_client_max_body_size() << std::endl;
 	os << config.get_root() << std::endl;
 	os << config.get_index() << std::endl;
-	os << config.get_location().at("/tours") << std::endl;
+	//os << config.get_location().at("/") << std::endl;
 	os << config.get_cgi() << std::endl;
 	return (os);
 /* os << this-> << std::endl;
