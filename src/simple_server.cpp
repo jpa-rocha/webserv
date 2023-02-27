@@ -17,32 +17,66 @@
 const int MAX_CONN = 5;
 
 
-void send_response(int client_socket, const std::string& content)
+void send_response(int client_socket, const std::string& path)
 {
-    // Generate the HTTP response headers
-    std::ostringstream response_stream;
-    response_stream << "HTTP/1.1 200 OK\r\n";
-    response_stream << "Content-Length: " << content.length() << "\r\n";
-    response_stream << "Content-Type: text/plain\r\n";
-    response_stream << "Connection: close\r\n";
-    response_stream << "\r\n";
+    std::string			response_body;
+    std::string			respond_path;
+	std::string			response;
+	std::ostringstream	response_stream;
 
-    // Add the content to the response body
-    response_stream << content;
+    if (path == "/favicon.ico" || path == "/")
+        respond_path = "/index.html";
+    else
+        respond_path = path;
+    
+    respond_path = "docs/www" + respond_path;
 
-    // Send the response to the client
-    std::string response = response_stream.str();
-    send(client_socket, response.c_str(), response.length(), 0);
+    std::ifstream file(respond_path);
+    if (!file.is_open())
+    {
+        // if the file cannot be opened, send a 404 error
 
-    // Close the connection
-    close(client_socket);
+        std::ifstream error404("docs/www/errors/404_NotFound.html");
+        if (!error404.is_open())
+            perror("error opening 404 file\n");
+        else
+        {
+            std::stringstream	file_buffer;
+            file_buffer << error404.rdbuf();
+            response_body = file_buffer.str();
+            response_stream << "HTTP/1.1 404 Not Found\r\n\r\n";
+            error404.close();
+        }
+    }
+    else
+    {
+        std::stringstream	file_buffer;
+        file_buffer << file.rdbuf();
+        response_body = file_buffer.str();
+		// Generate the HTTP response headers
+    	response_stream << "HTTP/1.1 200 OK\r\n";	
+        // Add the content to the response body
+    }
+    response_stream << response_body;
+	// Send the response to the client
+	response = response_stream.str();
+    //std::cerr << RED << response_body << RESET <<std::endl;
+    if ( send(client_socket, response.c_str(), response.length(), 0) < 0  )
+	{
+		perror("error while sending the response");
+	}
+
+    // Close the file
+    file.close();
+	close(client_socket);
+    client_socket = -1;
 }
 
 
 int main()
 {
     int sockfd;
-    int port = 8081;
+    int port = 8084;
     char buf[1024];
 
     //Create socket
@@ -153,17 +187,18 @@ int main()
             {
                 int n;
                 
-                if ((n = read(connfd, buf, sizeof(buf))) < 0)
+                if ( (n = read(connfd, buf, sizeof(buf))) < 0 )
                 {
                     if (errno != ECONNRESET)
                     {
-                        perror("read");
+						std::cout << "this is n - " << n << std::endl;
+                        perror("error while reading the fd");
                     }
                 }
                 else if (n == 0)
                 {
                     printf("Connection closed\n");
-                    close(connfd);
+                    //close(connfd);
                     fds[i].fd = -1;
                 }
                 else
@@ -172,9 +207,10 @@ int main()
 					//print function of class
                     httpHeader request(buf);
                     request.printHeader();
-					printf("%s", buf);
+					//printf("%s", buf);
 					memset(buf, 0, 1024);
-					send_response(connfd, "Hello");
+					//std::cout << GREEN << request.getUri() << RESET << std::endl;
+					send_response(connfd, request.getUri());
                 }
 
                 if (--nready <= 0)
@@ -182,6 +218,7 @@ int main()
                     break;
                 }
             }
+            fds[i].fd = -1;
         }
     }
 
