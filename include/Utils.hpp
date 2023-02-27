@@ -17,7 +17,6 @@
 # define CYAN    "\033[36m"
 # define WHITE   "\033[37m"
 
-<<<<<<< HEAD
 #include <iostream>
 #include <string>
 #include <map>
@@ -39,7 +38,6 @@ enum httpMethods
 	CONNECT,
 	NONE
 };
-=======
 /*
 
 	Error Messages
@@ -90,6 +88,5 @@ enum httpMethods
 
 // error_code 15
 # define NO_VALID_CGI_EXT "ERROR: --- Could not find a valid ** cgi_ext ** configuration ---"
->>>>>>> config-parsing
 
 #endif
