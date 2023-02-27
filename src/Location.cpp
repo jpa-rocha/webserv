@@ -6,7 +6,8 @@ Location::Location()
 	this->_index = "";
 	this->_autoindex = false;
 	// needs to be included later
-	this->_methods.push_back(0);
+	// TODO chage to get on merge
+	this->_methods.insert(std::make_pair(0, true));
 	this->_alias = "";
 	this->_redirection = "";
 }
@@ -21,7 +22,7 @@ bool										Location::get_autoindex()
 	return this->_autoindex;
 }
 
-std::vector<short>							Location::get_methods()
+std::map<short, bool>							Location::get_methods()
 {
 	return this->_methods;
 }
@@ -53,9 +54,9 @@ void										Location::set_autoindex(bool autoindex)
 	this->_autoindex = autoindex;
 }
 
-void										Location::set_methods(std::vector<short> methods)
+void										Location::set_methods(short method, bool allowed)
 {
-	this->_methods = methods;
+	this->_methods.insert(std::make_pair(method, allowed));
 }
 
 void										Location::set_index(std::string	index)
@@ -77,7 +78,7 @@ std::ostream &operator<<(std::ostream &os, Location &location)
 {
 	os << location.get_root() << std::endl;
 	os << location.get_autoindex() << std::endl;
-	//os << location.get_methods() << std::endl;
+	os << location.get_methods() << std::endl;
 	os << location.get_index() << std::endl;
 	os << location.get_redirection() << std::endl;
 	os << location.get_alias() << std::endl;

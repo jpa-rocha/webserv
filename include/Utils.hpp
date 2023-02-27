@@ -63,6 +63,9 @@
 # define NO_VALID_METHODS "ERROR: --- Could not find a valid ** allowed_methods ** configuration ---"
 
 // error_code 14
-# define NO_VALID_CGI_PATH "ERROR: --- Could not find a valid ** index ** configuration ---"
+# define NO_VALID_CGI_PATH "ERROR: --- Could not find a valid ** cgi_path ** configuration ---"
+
+// error_code 15
+# define NO_VALID_CGI_EXT "ERROR: --- Could not find a valid ** cgi_ext ** configuration ---"
 
 #endif

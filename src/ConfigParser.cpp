@@ -5,7 +5,7 @@ ConfigParser::ConfigParser()
 	std::ifstream in_file;
 	
 	this->set_error_code(0);
-	this->_n_servers = 0;
+	this->set_n_servers(0);
 	//this->_config = new std::vector<Config>;
 	
 	// Check if config file exists
@@ -35,9 +35,19 @@ int ConfigParser::get_error_code()
 	return this->_error_code;
 }
 
+int ConfigParser::get_n_servers()
+{
+	return this->_n_servers;
+}
+
 void ConfigParser::set_error_code(int error_code)
 {
 	this->_error_code = error_code;
+}
+
+void ConfigParser::set_n_servers(int i)
+{
+	this->_n_servers = i;
 }
 
 bool ConfigParser::check_server_context(std::ifstream& config_file)
@@ -54,7 +64,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 		if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && line.find("}") != std::string::npos)
 			return false;
 		else if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && context == 0) {
-			this->_n_servers += 1;
+			this->set_n_servers(this->get_n_servers() + 1);
 			context += 1;
 			this->_config.push_back(Config());
 		}
@@ -96,12 +106,12 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 	}
 	//std::cout << _n_servers << std::endl;
 	//std::cout << this->get_config(0).get_cgi() << std::endl;
-	std::cout << "output" << std::endl;
-	std::cout << this->get_config(0).get_cgi().get_path().at("python3") << std::endl;
-	std::cout << this->get_config(0).get_cgi().get_path().at("bash") << std::endl;
-	std::cout << this->get_config(0).get_cgi().get_ext().at(0) << std::endl;
-	std::cout << this->get_config(0).get_cgi().get_ext().at(1) << std::endl;
-	std::cout << this->get_config(0).get_cgi().get_root() << std::endl;
+	// std::cout << "output" << std::endl;
+	// std::cout << this->get_config(0).get_cgi().get_path().at("python3") << std::endl;
+	// std::cout << this->get_config(0).get_cgi().get_path().at("bash") << std::endl;
+	// std::cout << this->get_config(0).get_cgi().get_ext().at(0) << std::endl;
+	// std::cout << this->get_config(0).get_cgi().get_ext().at(1) << std::endl;
+	// std::cout << this->get_config(0).get_cgi().get_root() << std::endl;
 	if (context == 0 && this->get_error_code() == 0)
 		return true;
 	return false;
@@ -137,7 +147,7 @@ void ConfigParser::clean_listen(std::string line)
 	line = this->find_int(line);
 	if (line.size() == 0)
 		this->set_error_code(3);
-	this->get_config(this->_n_servers - 1).set_port(this->to_int(line.c_str()));
+	this->get_config(this->get_n_servers() - 1).set_port(this->to_int(line.c_str()));
 }
 
 void ConfigParser::clean_host(std::string line)
@@ -145,7 +155,7 @@ void ConfigParser::clean_host(std::string line)
 	line = this->find_int(line);
 	if (line.size() == 0)
 		this->set_error_code(4);
-	this->get_config(this->_n_servers - 1).set_host(inet_addr(line.c_str()));
+	this->get_config(this->get_n_servers() - 1).set_host(inet_addr(line.c_str()));
 }
 
 // TODO break if there is no value
@@ -158,7 +168,7 @@ void ConfigParser::clean_error_page(std::string line)
 	std::string path = &line[pos];
 	pos = line.find_first_of(" ");
 	line.erase(pos);
-	this->get_config(this->_n_servers - 1).set_default_error(this->to_int(line), path);
+	this->get_config(this->get_n_servers() - 1).set_default_error(this->to_int(line), path);
 }
 
 void ConfigParser::clean_server_name(std::string line)
@@ -166,7 +176,7 @@ void ConfigParser::clean_server_name(std::string line)
 	line = this->get_value(line);
 	if (line.size() == 0)
 		this->set_error_code(6);
-	this->get_config(this->_n_servers - 1).set_server_name(line);
+	this->get_config(this->get_n_servers() - 1).set_server_name(line);
 }
 
 void ConfigParser::clean_client_max_body_size(std::string line)
@@ -174,15 +184,15 @@ void ConfigParser::clean_client_max_body_size(std::string line)
 	line = this->find_int(line);
 	if (line.size() == 0)
 		this->set_error_code(7);
-	this->get_config(this->_n_servers - 1).set_client_max_body_size(this->to_int(line.c_str()));
+	this->get_config(this->get_n_servers() - 1).set_client_max_body_size(this->to_int(line.c_str()));
 }
 
 void ConfigParser::clean_autoindex(std::string line)
 {
 	if (line.find("on") != std::string::npos)
-		this->get_config(this->_n_servers - 1).set_autoindex(true);
+		this->get_config(this->get_n_servers() - 1).set_autoindex(true);
 	else if (line.find("off") != std::string::npos)
-		this->get_config(this->_n_servers - 1).set_autoindex(false);
+		this->get_config(this->get_n_servers() - 1).set_autoindex(false);
 	else	
 		this->set_error_code(8);
 }
@@ -192,7 +202,7 @@ void ConfigParser::clean_root(std::string line)
 	line = this->get_value(line);
 	if (line.size() == 0)
 		this->set_error_code(9);
-	this->get_config(this->_n_servers - 1).set_root(line);
+	this->get_config(this->get_n_servers() - 1).set_root(line);
 }
 
 void ConfigParser::clean_index(std::string line)
@@ -200,7 +210,7 @@ void ConfigParser::clean_index(std::string line)
 	line = this->get_value(line);
 	if (line.size() == 0)
 		this->set_error_code(10);
-	this->get_config(this->_n_servers - 1).set_index(line);
+	this->get_config(this->get_n_servers() - 1).set_index(line);
 }
 
 void ConfigParser::clean_location(std::ifstream& config_file, std::string line)
@@ -216,9 +226,8 @@ void ConfigParser::clean_location(std::ifstream& config_file, std::string line)
 			location.set_root(this->get_value(line));
 		if ((line.find(AUTOINDEX) != std::string::npos) && this->check_def_format(AUTOINDEX, line))
 			location.set_autoindex(this->clean_loc_autoindex(line));
-		//if ((line.find(ALLOW_METHODS) != std::string::npos)  && this->check_def_format(ALLOW_METHODS, line)) {}
-		// TODO clean methods
-			//location.set_methods();
+		if ((line.find(ALLOW_METHODS) != std::string::npos) && this->check_def_format(ALLOW_METHODS, line))
+			this->clean_methods(line, location);
 		if ((line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
 			location.set_index(this->get_value(line));
 		if ((line.find(ALIAS) != std::string::npos)  && this->check_def_format(ALIAS, line))
@@ -228,7 +237,7 @@ void ConfigParser::clean_location(std::ifstream& config_file, std::string line)
 	}	
 	if (exit_context != 1 || (location.get_index().empty() || location.get_root().empty()))
 		this->set_error_code(11);
-	this->get_config(this->_n_servers - 1).set_location(key, location);
+	this->get_config(this->get_n_servers() - 1).set_location(key, location);
 	// location here/ {
 }
 
@@ -249,8 +258,7 @@ void ConfigParser::clean_cgi(std::ifstream& config_file, std::string line)
 	}
 	if (!exit_context || (cgi.get_path().empty() || cgi.get_ext().empty() || cgi.get_root().empty()))
 		this->set_error_code(12);
-	std::cout << "before copy construct" << std::endl;
-	this->_config[this->_n_servers - 1].set_cgi(cgi);
+	this->_config[this->get_n_servers() - 1].set_cgi(cgi);
 }
 
 bool 								ConfigParser::clean_loc_autoindex(std::string line)
@@ -260,9 +268,25 @@ bool 								ConfigParser::clean_loc_autoindex(std::string line)
 	return false;
 }
 
-void				ConfigParser::clean_methods(std::string line)
+void				ConfigParser::clean_methods(std::string line, Location& location)
 {
-	(void) line;
+	line = this->remove_end(line, ';');
+	size_t pos = 0;
+	size_t pos2 = 0;
+	line = this->remove_end(line, ';');
+	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	pos = line.find_first_of(" \r\t\b\f", pos);
+	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	while (pos != std::string::npos) {
+		pos = line.find_first_not_of(" \r\t\b\f", pos);
+		pos2 = line.find_first_of(" \r\t\b\f", pos);
+		if  (this->get_method_num(line.substr(pos, pos2 - pos)) < 0)
+			this->set_error_code(13);
+		location.set_methods(this->get_method_num(line.substr(pos, pos2 - pos)), 1);
+		pos = pos2;
+	}
+	if (location.get_methods().empty())
+		this->set_error_code(13);
 	// this->set_error_code(13);
 }
 
@@ -293,7 +317,6 @@ void			ConfigParser::clean_cgi_ext(std::string line, CGI &cgi)
 {
 	size_t pos = 0;
 	size_t pos2 = 0;
-
 	line = this->remove_end(line, ';');
 	pos = line.find_first_not_of(" \r\t\b\f", pos);
 	pos = line.find_first_of(" \r\t\b\f", pos);
@@ -301,11 +324,11 @@ void			ConfigParser::clean_cgi_ext(std::string line, CGI &cgi)
 	while (pos != std::string::npos) {
 		pos = line.find_first_not_of(" \r\t\b\f", pos);
 		pos2 = line.find_first_of(" \r\t\b\f", pos);
-		cgi.set_ext(line.substr(pos, pos2 - 1));
+		cgi.set_ext(line.substr(pos, pos2 - pos));
 		pos = pos2;
 	}
 	if (cgi.get_path().empty())
-		this->set_error_code(14);
+		this->set_error_code(15);
 }
 
 
@@ -339,6 +362,26 @@ bool	ConfigParser::check_def_format(std::string def, std::string line)
 	return false;
 }
 
+int			ConfigParser::get_method_num(std::string method)
+{
+	if (method == "GET")
+		return 0;
+	else if (method == "POST")
+		return 1;
+	else if (method == "PUT")
+		return 2;
+	else if (method == "HEAD")
+		return 3;
+	else if (method == "OPTIONS")
+		return 4;
+	else if (method == "TRACE")
+		return 5;
+	else if (method == "CONNECT")
+		return 6;
+	else
+		return -1;
+}
+
 int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 {
 	if (err_code == 1)
@@ -369,6 +412,8 @@ int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 		std::cout << RED << NO_VALID_METHODS<< RESET << std::endl;
 	else if (err_code == 14)
 		std::cout << RED << NO_VALID_CGI_PATH << RESET << std::endl;
+	else if (err_code == 15)
+		std::cout << RED << NO_VALID_CGI_EXT << RESET << std::endl;
 	in_file.close();
 	return(err_code);
 }

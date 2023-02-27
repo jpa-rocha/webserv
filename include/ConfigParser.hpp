@@ -39,9 +39,11 @@ class ConfigParser {
 		// Getter
 		Config& get_config(int i);
 		int get_error_code();
+		int get_n_servers();
 
 		//
 		void set_error_code(int error_code);
+		void set_n_servers(int i);
 
 		// Cleaners
 		void clean_listen(std::string line);
@@ -54,8 +56,8 @@ class ConfigParser {
 		void clean_index(std::string line);
 		void clean_location(std::ifstream& config_file, std::string line);
 		void clean_cgi(std::ifstream& config_file, std::string line);
-		
-		void clean_methods(std::string line);
+
+		void clean_methods(std::string line, Location &location);
 		void clean_cgi_path(std::string line, CGI &cgi);
 		void clean_cgi_ext(std::string line, CGI &cgi);
 		bool clean_loc_autoindex(std::string line);
@@ -68,6 +70,7 @@ class ConfigParser {
 		std::string get_value(std::string line);
 		int    		to_int(std::string str);
 		bool 		check_def_format(std::string def, std::string line);
+		int			get_method_num(std::string method);
 
 
 

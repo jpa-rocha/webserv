@@ -15,6 +15,9 @@ int main (int argc, char** argv)
 		ConfigParser config;
 		if (config.get_error_code() != 0)
 			return EXIT_FAILURE;
+		Config configs = config.get_config(0);
+		//for (int i = 0; i < config.get_n_servers(); i++)
+		//	OurServer(config.get_config(i));
 		// run default config file	
 		std::cout << GREEN << config.get_config(0) << RESET << std::endl;
 	}
