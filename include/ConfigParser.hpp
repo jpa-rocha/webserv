@@ -33,29 +33,44 @@ class ConfigParser {
 	public:
 		ConfigParser();
 		ConfigParser(std::string config_file);
+		~ConfigParser();
 		
 
 		// Getter
-		Config get_config();
+		Config& get_config(int i);
 		int get_error_code();
+		int get_n_servers();
+
+		//
+		void set_error_code(int error_code);
+		void set_n_servers(int i);
 
 		// Cleaners
-		int clean_listen(std::string line);
-		int clean_host(std::string line);
-		int clean_error_page(std::string line);
-		int clean_server_name(std::string line);
-		int clean_client_max_body_size(std::string line);
-		int clean_autoindex(std::string line);
-		int clean_root(std::string line);
-		int clean_index(std::string line);
-		int clean_location(std::ifstream& config_file, std::string line);
+		void clean_listen(std::string line);
+		void clean_host(std::string line);
+		void clean_error_page(std::string line);
+		void clean_server_name(std::string line);
+		void clean_client_max_body_size(std::string line);
+		void clean_autoindex(std::string line);
+		void clean_root(std::string line);
+		void clean_index(std::string line);
+		void clean_location(std::ifstream& config_file, std::string line);
+		void clean_cgi(std::ifstream& config_file, std::string line);
+
+		void clean_methods(std::string line, Location &location);
+		void clean_cgi_path(std::string line, CGI &cgi);
+		void clean_cgi_ext(std::string line, CGI &cgi);
+		bool clean_loc_autoindex(std::string line);
+
 
 		// Utils
 		std::string remove_comments(std::string line);
 		std::string remove_end(std::string line, char symbol);
 		std::string find_int(std::string line);
 		std::string get_value(std::string line);
-		int    		toInt(std::string str);
+		int    		to_int(std::string str);
+		bool 		check_def_format(std::string def, std::string line);
+		int			get_method_num(std::string method);
 
 
 

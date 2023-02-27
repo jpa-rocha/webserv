@@ -27,6 +27,8 @@ SRCDIR =		./src/
 SRCS	=	$(SRCDIR)webserv.cpp		\
 			$(SRCDIR)Config.cpp			\
 			$(SRCDIR)ConfigParser.cpp	\
+			$(SRCDIR)Location.cpp	\
+			$(SRCDIR)CGI.cpp	\
 
 ################################################################################
 #################################### PROGRAM ###################################
