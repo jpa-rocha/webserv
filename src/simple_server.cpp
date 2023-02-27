@@ -17,24 +17,50 @@
 const int MAX_CONN = 5;
 
 
-void send_response(int client_socket, const std::string& content)
+void send_response(int client_socket, const std::string& path)
 {
+    std::string response_body;
+    std::string respond_path;
+    if (path == "/favicon.ico" || path == "/")
+        respond_path = "/index.html";
+    else
+        respond_path = path;
+    
+    respond_path = "docs/www" + respond_path;
+    std::cerr << RED << respond_path << RESET <<std::endl;
+
+    std::ifstream file(respond_path);
+    if (!file.is_open())
+    {
+        // if the file cannot be opened, send a 404 error
+        response_body = "HTTP/1.1 404 Not Found\r\n\r\n";
+        write(client_socket, response_body.c_str(), response_body.size());
+    }
+    else
+    {
+        std::stringstream file_buffer;
+        file_buffer << file.rdbuf();
+        response_body = file_buffer.str();
+    }
+    
+    //std::cerr << RED << response_body << RESET <<std::endl;
     // Generate the HTTP response headers
     std::ostringstream response_stream;
     response_stream << "HTTP/1.1 200 OK\r\n";
-    response_stream << "Content-Length: " << content.length() << "\r\n";
+    /*response_stream << "Content-Length: " << response_body.length() << "\r\n";
     response_stream << "Content-Type: text/plain\r\n";
     response_stream << "Connection: close\r\n";
-    response_stream << "\r\n";
+    response_stream << "\r\n"; */
 
     // Add the content to the response body
-    response_stream << content;
+    response_stream << response_body;
 
     // Send the response to the client
     std::string response = response_stream.str();
     send(client_socket, response.c_str(), response.length(), 0);
 
     // Close the connection
+    file.close();
     close(client_socket);
 }
 
@@ -174,7 +200,8 @@ int main()
                     request.printHeader();
 					printf("%s", buf);
 					memset(buf, 0, 1024);
-					send_response(connfd, "Hello");
+					//std::cout << GREEN << request.getUri() << RESET << std::endl;
+					send_response(connfd, request.getUri());
                 }
 
                 if (--nready <= 0)
