@@ -32,7 +32,9 @@
 			std::map<short, bool>			get_methods();
       		std::string						get_index();
       		std::string						get_redirection();
-     	 	std::string						get_alias();      
+     	 	std::string						get_alias();
+
+			bool							check_method_at(short method);  
 
 	};
 	std::ostream& operator<<(std::ostream& os, Location& location);
