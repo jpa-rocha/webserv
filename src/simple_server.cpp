@@ -135,7 +135,7 @@ int main(int argc, char** argv)
                 else if (n == 0)
                 {
                     printf("Connection closed\n");
-                    //close(connfd);
+                    close(connfd);
                     fds[i].fd = -1;
                 }
                 else
@@ -154,6 +154,8 @@ int main(int argc, char** argv)
                     break;
                 }
             }
+			close(connfd);
+			fds[i].fd = -1;
         }
     }
 

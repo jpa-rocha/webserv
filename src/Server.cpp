@@ -1,6 +1,6 @@
 #include "../include/Server.hpp"
 
-Server::Server(Config config): _config(config)
+Server::Server(Config config): _config(config), _error(0)
 {
 	this->_port = this->_config.get_port();
 	if ((this->_sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
