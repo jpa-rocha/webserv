@@ -1,6 +1,6 @@
 #include "../include/Server.hpp"
 
-Server::Server(Config config): _config(config)
+Server::Server(Config config): _config(config), _error(0)
 {
 	this->_port = this->_config.get_port();
 	if (this->init_socket() != 0)
