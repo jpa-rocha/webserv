@@ -25,6 +25,10 @@ class Server
 		Server(Config config);
 		~Server();
 
+		int		init_socket();
+		int		bind_socket();
+		int		listen_socket();
+		
 		int     get_sockfd() const;
         int     get_port() const;
 		int	    getError()	const;
