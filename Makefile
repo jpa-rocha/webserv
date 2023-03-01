@@ -29,6 +29,7 @@ SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)Location.cpp		\
 			$(SRCDIR)CGI.cpp			\
 			$(SRCDIR)httpHeader.cpp		\
+			$(SRCDIR)Server.cpp			\
 			$(SRCDIR)simple_server.cpp		
 
 ################################################################################

@@ -61,6 +61,8 @@ bool										Location::check_method_at(short method)
 
 void										Location::set_root(std::string	root)
 {
+	if (root[root.size() - 1] != '/')
+		root = root + "/";
 	this->_root = root;
 }
 

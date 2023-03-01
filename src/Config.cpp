@@ -6,7 +6,7 @@ Config::Config()
 	this->set_port(8001);
 	this->set_host(inet_addr("127.0.0.1"));
 	this->set_server_name("test");
-	this->set_default_error(404, "/error/404.html");
+	//this->set_default_error(404, "error/404_NotFound.html");
 	this->set_client_max_body_size(1024);
 	this->set_autoindex(false);
 	this->set_root("./root");
@@ -52,6 +52,12 @@ std::string					&Config::get_server_name()
 std::map<int, std::string>	&Config::get_default_error()
 {
 	return this->_default_error;
+}
+
+std::string							&Config::get_error_path(int error)
+{
+	
+	return this->get_default_error().at(error);
 }
 
 int 						&Config::get_client_max_body_size()

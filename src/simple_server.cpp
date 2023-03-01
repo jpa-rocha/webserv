@@ -13,33 +13,29 @@
 #include "../include/Utils.hpp"
 #include "../include/httpHeader.hpp"
 #include "../include/ConfigParser.hpp"
+#include "../include/Server.hpp"
 
-
-const int MAX_CONN = 5;
-
-
-void send_response(int client_socket, const std::string& path)
+void send_response(int client_socket, const std::string& path, Config &config)
 {
     std::string			response_body;
     std::string			respond_path;
 	std::string			response;
 	std::ostringstream	response_stream;
 
+	std::string root = config.get_root();
     if (path == "/favicon.ico" || path == "/")
-        respond_path = "/index.html";
+        respond_path = config.get_index();
     else
         respond_path = path;
     
-    respond_path = "docs/www" + respond_path;
-
+    respond_path = root + respond_path;
     std::ifstream file(respond_path.c_str());
     if (!file.is_open())
     {
         // if the file cannot be opened, send a 404 error
-
-        std::ifstream error404("docs/www/errors/404_NotFound.html");
+        std::ifstream error404((root + config.get_error_path(404)).c_str());
         if (!error404.is_open())
-            perror("error opening 404 file\n");
+            std::cerr << RED << _404_ERROR << RESET << std::endl;
         else
         {
             std::stringstream	file_buffer;
@@ -63,9 +59,7 @@ void send_response(int client_socket, const std::string& path)
 	response = response_stream.str();
     //std::cerr << RED << response_body << RESET <<std::endl;
     if ( send(client_socket, response.c_str(), response.length(), 0) < 0  )
-	{
-		perror("error while sending the response");
-	}
+        std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
     // Close the file
     file.close();
@@ -76,86 +70,44 @@ void send_response(int client_socket, const std::string& path)
 
 int main(int argc, char** argv)
 {
-(void) argv;
     if (argc > 2) {
-		// too many arguments
+		std::cerr << RED << TOO_MANY_ARGS << RESET << std::endl;
+		return EXIT_FAILURE;
 	}
 	ConfigParser config;
 
-	// if (argc == 2) {
-	// 	// error check and config parse
-	// }
-	// else {
-	// 	if (config.get_error_code() != 0)
-	// 		return EXIT_FAILURE;
-	// 	if (config.get_error_code() != 0)
-	// 		return EXIT_FAILURE;
-	// 	Config configs = config.get_config(0);
-	// 	//for (int i = 0; i < config.get_n_servers(); i++)
-	// 	//	OurServer(config.get_config(i));
-	// 	// run default config file	
-	std::cout << GREEN << config.get_config(0) << RESET << std::endl;
-    config.get_config(0).get_cgi().get_root()
-    return (0);
-	//}
-	
+	if (argc == 2) {
+		config = ConfigParser(argv[1]);
+	}
+	else {
+	 	if (config.get_error_code() != 0)
+	 		return EXIT_FAILURE;
+		Config configs = config.get_config(0);
+	}
 
-	//return EXIT_SUCCESS;
-    int sockfd[config.get_n_servers()];
-	//int port = config.get_config(0).get_port()
-    int port[config.get_n_servers()];
-    char buf[1024];
-
-    //Create socket
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        perror("socket");
-        return 1;
-    }
-
-    //Set socket options
-    int optval = 1;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0)
-    {
-        perror("setsockopt");
-        return 1;
-    }
-
-    struct sockaddr_in serv_addr[config.get_n_servers()];
-    //Bind socket to port
+    std::vector<Server> servers;
     for (int i = 0; i < config.get_n_servers(); i++)
     {
-        serv_addr[i].sin_family = AF_INET;
-        serv_addr[i].sin_port = htons(port[i]);
-        serv_addr[i].sin_addr.s_addr = htonl(INADDR_ANY);
-        if (bind(sockfd[i], (struct sockaddr *)&serv_addr[i], sizeof(serv_addr[i])) < 0)
-        {
-            perror("bind");
-            return 1;
-        }
-    }
-
-    //Listen on socket
-    if (listen(sockfd, MAX_CONN) < 0)
-    {
-        perror("listen");
-        return 1;
+        Server server = Server(config.get_config(i));
+        if (server.getError() != 0)
+            continue ;
+        servers.push_back(server);
     }
 
     //initialize poll
-    struct pollfd fds[config.get_n_servers()][MAX_CONN];
-
-    for (int j = 0; j < config.get_n_servers(); j++)
+    struct pollfd fds[MAX_CONN * config.get_n_servers()];
+    for (int i = 0; i < config.get_n_servers(); i++)
     {
-        fds[j][0].fd = sockfd[j];
-        fds[j][0].events = POLLIN;
-        for (int i = 1; i < MAX_CONN; i++)
-        {
-            fds[j][i].fd = -1;
-        }
+        fds[i].fd = servers[i].get_sockfd();
+        fds[i].events = POLLIN;
     }
 
-    int nfds = 1;
+    for (int i = config.get_n_servers(); i < MAX_CONN * config.get_n_servers(); i++)
+    {
+        fds[i].fd = -1;
+    }
+
+    int nfds = servers.size();
 
     while (true)
     {
@@ -167,48 +119,50 @@ int main(int argc, char** argv)
         }
 
         //Check for new connection
-        if (fds[0].revents & POLLIN)
+        for (int i = 0; i < config.get_n_servers(); i++)
         {
-            int connfd;
-            struct sockaddr_in cli_addr;
-            socklen_t cli_len = sizeof(cli_addr);
-            if ((connfd = accept(sockfd, (struct sockaddr *)&cli_addr, &cli_len)) < 0)
+            if (fds[i].revents & POLLIN)
             {
-                perror("accept");
-                return 1;
-            }
-
-            printf("Received new connection\n");
-
-            //Add new connection to poll
-            int i;
-            for (i = 1; i < MAX_CONN; i++)
-            {
-                if (fds[i].fd == -1)
+                int connfd;
+                struct sockaddr_in cli_addr;
+                socklen_t cli_len = sizeof(cli_addr);
+                if ((connfd = accept(servers[i].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
                 {
-                    fds[i].fd = connfd;
-                    fds[i].events = POLLIN;
-                    break;
+                    perror("accept");
+                    return 1;
+                }
+
+                printf("Received new connection\n");
+
+                //Add new connection to poll
+                int j;
+                for (j = 1; j < MAX_CONN * config.get_n_servers(); j++)
+                {
+                    if (fds[j].fd == -1)
+                    {
+                        fds[j].fd = connfd;
+                        fds[j].events = POLLIN;
+                        break;
+                    }
+                }
+
+                if (j == MAX_CONN * config.get_n_servers())
+                {
+                    std::cerr << "Too many connections" << std::endl;
+                }
+                else
+                {
+                    nfds++;
+                }
+
+                if (--nready <= 0)
+                {
+                    continue;
                 }
             }
-
-            if (i == MAX_CONN)
-            {
-                std::cerr << "Too many connections" << std::endl;
-            }
-            else
-            {
-                nfds++;
-            }
-
-            if (--nready <= 0)
-            {
-                continue;
-            }
         }
-
         //Check for data on all connections
-        for (int i = 1; i < nfds; i++)
+        for (int i = config.get_n_servers(); i < nfds; i++)
         {
             int connfd = fds[i].fd;
             if (connfd == -1)
@@ -220,11 +174,11 @@ int main(int argc, char** argv)
             {
                 int n;
                 
-                if ( (n = read(connfd, buf, sizeof(buf))) < 0 )
+                if ( (n = read(connfd, servers[i].get_buf(), sizeof(servers[i].get_buf()))) < 0 )
                 {
                     if (errno != ECONNRESET)
                     {
-						std::cout << "this is n - " << n << std::endl;
+						std::cerr << "this is n - " << n << std::endl;
                         perror("error while reading the fd");
                     }
                 }
@@ -238,12 +192,12 @@ int main(int argc, char** argv)
                 {
                     //make object of class
 					//print function of class
-                    httpHeader request(buf);
+                    httpHeader request(servers[i].get_buf());
                     request.printHeader();
 					//printf("%s", buf);
-					memset(buf, 0, 1024);
+					memset(servers[i].get_buf(), 0, 1024);
 					//std::cout << GREEN << request.getUri() << RESET << std::endl;
-					send_response(connfd, request.getUri());
+					send_response(connfd, request.getUri(), config.get_config(0));
                 }
 
                 if (--nready <= 0)
