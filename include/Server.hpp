@@ -3,6 +3,10 @@
 
 # include "Utils.hpp"
 # include "Config.hpp"
+#include <sstream>
+#include <iostream>
+#include <string>
+#include <cstring>
 
 class Server
 {
@@ -11,8 +15,8 @@ class Server
 		Config      	   	_config;
 		int 				_sockfd;
     	int 				_port;
-    	char* 				_buf;
 		int					_error;
+
 	
 		/* Server();
 		Server(const Server& copy); */
@@ -22,9 +26,11 @@ class Server
 		~Server();
 
 		int     get_sockfd() const;
-		char*   get_buf() const;
         int     get_port() const;
 		int	    getError()	const;
+		Config &get_config();
+
+		void send_response(int client_socket, const std::string& path);
 };
 
 #endif

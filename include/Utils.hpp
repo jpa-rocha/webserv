@@ -10,7 +10,8 @@
 #include "httpHeader.hpp"
 #include <fstream>
 #include <sys/socket.h>
-
+#include <unistd.h>
+#include <cstdlib> //for malloc
 
 const int MAX_CONN = 5;
 

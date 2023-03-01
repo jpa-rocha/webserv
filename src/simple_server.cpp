@@ -15,58 +15,6 @@
 #include "../include/ConfigParser.hpp"
 #include "../include/Server.hpp"
 
-void send_response(int client_socket, const std::string& path, Config &config)
-{
-    std::string			response_body;
-    std::string			respond_path;
-	std::string			response;
-	std::ostringstream	response_stream;
-
-	std::string root = config.get_root();
-    if (path == "/favicon.ico" || path == "/")
-        respond_path = config.get_index();
-    else
-        respond_path = path;
-    
-    respond_path = root + respond_path;
-    std::ifstream file(respond_path.c_str());
-    if (!file.is_open())
-    {
-        // if the file cannot be opened, send a 404 error
-        std::ifstream error404((root + config.get_error_path(404)).c_str());
-        if (!error404.is_open())
-            std::cerr << RED << _404_ERROR << RESET << std::endl;
-        else
-        {
-            std::stringstream	file_buffer;
-            file_buffer << error404.rdbuf();
-            response_body = file_buffer.str();
-            response_stream << "HTTP/1.1 404 Not Found\r\n\r\n";
-            error404.close();
-        }
-    }
-    else
-    {
-        std::stringstream	file_buffer;
-        file_buffer << file.rdbuf();
-        response_body = file_buffer.str();
-		// Generate the HTTP response headers
-    	response_stream << "HTTP/1.1 200 OK\r\n";	
-        // Add the content to the response body
-    }
-    response_stream << response_body;
-	// Send the response to the client
-	response = response_stream.str();
-    //std::cerr << RED << response_body << RESET <<std::endl;
-    if ( send(client_socket, response.c_str(), response.length(), 0) < 0  )
-        std::cerr << RED << _RES_ERROR << RESET << std::endl;
-
-    // Close the file
-    file.close();
-	close(client_socket);
-    client_socket = -1;
-}
-
 
 int main(int argc, char** argv)
 {
@@ -117,7 +65,6 @@ int main(int argc, char** argv)
             perror("poll");
             return 1;
         }
-
         //Check for new connection
         for (int i = 0; i < config.get_n_servers(); i++)
         {
@@ -132,11 +79,11 @@ int main(int argc, char** argv)
                     return 1;
                 }
 
-                printf("Received new connection\n");
+               std::cout << GREEN << "Received new connection\n" << RESET << std::endl;
 
                 //Add new connection to poll
                 int j;
-                for (j = 1; j < MAX_CONN * config.get_n_servers(); j++)
+                for (j = config.get_n_servers(); j < MAX_CONN * config.get_n_servers(); j++)
                 {
                     if (fds[j].fd == -1)
                     {
@@ -154,13 +101,14 @@ int main(int argc, char** argv)
                 {
                     nfds++;
                 }
-
                 if (--nready <= 0)
                 {
-                    continue;
+                    break ;
                 }
             }
         }
+        if (!nready)
+            continue ;
         //Check for data on all connections
         for (int i = config.get_n_servers(); i < nfds; i++)
         {
@@ -172,11 +120,13 @@ int main(int argc, char** argv)
 
             if (fds[i].revents & (POLLIN | POLLERR))
             {
-                int n;
-                
-                if ( (n = read(connfd, servers[i].get_buf(), sizeof(servers[i].get_buf()))) < 0 )
+		        int n;
+                char buff[servers[0].get_config().get_client_max_body_size()];
+                n = read(connfd, buff, sizeof(buff));            
+                std::cout << "read return: " << n << std::endl;
+                if ( n < 0 )
                 {
-                    if (errno != ECONNRESET)
+                    if (errno != ECONNRESET) //TODO cannot use errno
                     {
 						std::cerr << "this is n - " << n << std::endl;
                         perror("error while reading the fd");
@@ -192,12 +142,11 @@ int main(int argc, char** argv)
                 {
                     //make object of class
 					//print function of class
-                    httpHeader request(servers[i].get_buf());
+                    httpHeader request(buff);
                     request.printHeader();
-					//printf("%s", buf);
-					memset(servers[i].get_buf(), 0, 1024);
+					memset(buff, 0, 1024);
 					//std::cout << GREEN << request.getUri() << RESET << std::endl;
-					send_response(connfd, request.getUri(), config.get_config(0));
+					servers[0].send_response(connfd, request.getUri());
                 }
 
                 if (--nready <= 0)
@@ -205,7 +154,6 @@ int main(int argc, char** argv)
                     break;
                 }
             }
-            fds[i].fd = -1;
         }
     }
 
