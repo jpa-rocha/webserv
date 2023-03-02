@@ -114,10 +114,17 @@ void Server::send_response(int client_socket, const std::string& path)
         file_buffer << file.rdbuf();
         response_body = file_buffer.str();
 		// Generate the HTTP response headers
-    	response_stream << "HTTP/1.1 200 OK\r\n";	
+    	response_stream << "HTTP/1.1 200 OK\r\n";
+		response_stream << 	"Content-Type: text/html\r\n\r\n";
         // Add the content to the response body
     }
+	
     response_stream << response_body;
+    response_stream << "<style>";
+	std::string css = readFile("docs/www/utils/style.css");
+	response_stream << css;
+	response_stream << "</style>";
+	
 	// Send the response to the client
 	response = response_stream.str();
     //std::cerr << RED << response_body << RESET <<std::endl;
