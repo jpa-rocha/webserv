@@ -9,120 +9,53 @@
 #include <poll.h>
 #include <errno.h>
 #include <stdio.h>
-
-#include "../include/httpHeader.hpp"
-
 #include <sstream>
+#include "../include/Utils.hpp"
+#include "../include/httpHeader.hpp"
+#include "../include/ConfigParser.hpp"
+#include "../include/Server.hpp"
 
-const int MAX_CONN = 5;
 
-
-void send_response(int client_socket, const std::string& path)
+int main(int argc, char** argv)
 {
-    std::string			response_body;
-    std::string			respond_path;
-	std::string			response;
-	std::ostringstream	response_stream;
+    if (argc > 2) {
+		std::cerr << RED << TOO_MANY_ARGS << RESET << std::endl;
+		return EXIT_FAILURE;
+	}
+	ConfigParser config;
 
-    if (path == "/favicon.ico" || path == "/")
-        respond_path = "/index.html";
-    else
-        respond_path = path;
-    
-    respond_path = "docs/www" + respond_path;
-
-    std::ifstream file(respond_path);
-    if (!file.is_open())
-    {
-        // if the file cannot be opened, send a 404 error
-
-        std::ifstream error404("docs/www/errors/404_NotFound.html");
-        if (!error404.is_open())
-            perror("error opening 404 file\n");
-        else
-        {
-            std::stringstream	file_buffer;
-            file_buffer << error404.rdbuf();
-            response_body = file_buffer.str();
-            response_stream << "HTTP/1.1 404 Not Found\r\n\r\n";
-            error404.close();
-        }
-    }
-    else
-    {
-        std::stringstream	file_buffer;
-        file_buffer << file.rdbuf();
-        response_body = file_buffer.str();
-		// Generate the HTTP response headers
-    	response_stream << "HTTP/1.1 200 OK\r\n";	
-        // Add the content to the response body
-    }
-    response_stream << response_body;
-	// Send the response to the client
-	response = response_stream.str();
-    //std::cerr << RED << response_body << RESET <<std::endl;
-    if ( send(client_socket, response.c_str(), response.length(), 0) < 0  )
-	{
-		perror("error while sending the response");
+	if (argc == 2) {
+		config = ConfigParser(argv[1]);
+	}
+	else {
+	 	if (config.get_error_code() != 0)
+	 		return EXIT_FAILURE;
+		Config configs = config.get_config(0);
 	}
 
-    // Close the file
-    file.close();
-	close(client_socket);
-    client_socket = -1;
-}
-
-
-int main()
-{
-    int sockfd;
-    int port = 8084;
-    char buf[1024];
-
-    //Create socket
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    std::vector<Server> servers;
+    for (int i = 0; i < config.get_n_servers(); i++)
     {
-        perror("socket");
-        return 1;
-    }
-
-    //Set socket options
-    int optval = 1;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0)
-    {
-        perror("setsockopt");
-        return 1;
-    }
-
-    //Bind socket to port
-    struct sockaddr_in serv_addr;
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-    {
-        perror("bind");
-        return 1;
-    }
-
-    //Listen on socket
-    if (listen(sockfd, MAX_CONN) < 0)
-    {
-        perror("listen");
-        return 1;
+        Server server = Server(config.get_config(i));
+        if (server.getError() != 0)
+            continue ;
+        servers.push_back(server);
     }
 
     //initialize poll
-    struct pollfd fds[MAX_CONN];
-    fds[0].fd = sockfd;
-    fds[0].events = POLLIN;
+    struct pollfd fds[MAX_CONN * config.get_n_servers()];
+    for (int i = 0; i < config.get_n_servers(); i++)
+    {
+        fds[i].fd = servers[i].get_sockfd();
+        fds[i].events = POLLIN;
+    }
 
-    for (int i = 1; i < MAX_CONN; i++)
+    for (int i = config.get_n_servers(); i < MAX_CONN * config.get_n_servers(); i++)
     {
         fds[i].fd = -1;
     }
 
-    int nfds = 1;
+    int nfds = servers.size();
 
     while (true)
     {
@@ -132,50 +65,52 @@ int main()
             perror("poll");
             return 1;
         }
-
         //Check for new connection
-        if (fds[0].revents & POLLIN)
+        for (int i = 0; i < config.get_n_servers(); i++)
         {
-            int connfd;
-            struct sockaddr_in cli_addr;
-            socklen_t cli_len = sizeof(cli_addr);
-            if ((connfd = accept(sockfd, (struct sockaddr *)&cli_addr, &cli_len)) < 0)
+            if (fds[i].revents & POLLIN)
             {
-                perror("accept");
-                return 1;
-            }
-
-            printf("Received new connection\n");
-
-            //Add new connection to poll
-            int i;
-            for (i = 1; i < MAX_CONN; i++)
-            {
-                if (fds[i].fd == -1)
+                int connfd;
+                struct sockaddr_in cli_addr;
+                socklen_t cli_len = sizeof(cli_addr);
+                if ((connfd = accept(servers[i].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
                 {
-                    fds[i].fd = connfd;
-                    fds[i].events = POLLIN;
-                    break;
+                    perror("accept");
+                    return 1;
+                }
+
+               std::cout << GREEN << "Received new connection\n" << RESET << std::endl;
+
+                //Add new connection to poll
+                int j;
+                for (j = config.get_n_servers(); j < MAX_CONN * config.get_n_servers(); j++)
+                {
+                    if (fds[j].fd == -1)
+                    {
+                        fds[j].fd = connfd;
+                        fds[j].events = POLLIN;
+                        break;
+                    }
+                }
+
+                if (j == MAX_CONN * config.get_n_servers())
+                {
+                    std::cerr << "Too many connections" << std::endl;
+                }
+                else
+                {
+                    nfds++;
+                }
+                if (--nready <= 0)
+                {
+                    break ;
                 }
             }
-
-            if (i == MAX_CONN)
-            {
-                std::cerr << "Too many connections" << std::endl;
-            }
-            else
-            {
-                nfds++;
-            }
-
-            if (--nready <= 0)
-            {
-                continue;
-            }
         }
-
+        if (!nready)
+            continue ;
         //Check for data on all connections
-        for (int i = 1; i < nfds; i++)
+        for (int i = config.get_n_servers(); i < nfds; i++)
         {
             int connfd = fds[i].fd;
             if (connfd == -1)
@@ -185,32 +120,33 @@ int main()
 
             if (fds[i].revents & (POLLIN | POLLERR))
             {
-                int n;
-                
-                if ( (n = read(connfd, buf, sizeof(buf))) < 0 )
+		        int n;
+                char buff[servers[0].get_config().get_client_max_body_size()];
+                n = read(connfd, buff, sizeof(buff));            
+                std::cout << "read return: " << n << std::endl;
+                if ( n < 0 )
                 {
-                    if (errno != ECONNRESET)
+                    if (errno != ECONNRESET) //TODO cannot use errno
                     {
-						std::cout << "this is n - " << n << std::endl;
+						std::cerr << "this is n - " << n << std::endl;
                         perror("error while reading the fd");
                     }
                 }
                 else if (n == 0)
                 {
                     printf("Connection closed\n");
-                    //close(connfd);
+                    close(connfd);
                     fds[i].fd = -1;
                 }
                 else
                 {
                     //make object of class
 					//print function of class
-                    httpHeader request(buf);
+                    httpHeader request(buff);
                     request.printHeader();
-					//printf("%s", buf);
-					memset(buf, 0, 1024);
+					memset(buff, 0, 1024);
 					//std::cout << GREEN << request.getUri() << RESET << std::endl;
-					send_response(connfd, request.getUri());
+					servers[0].send_response(connfd, request.getUri());
                 }
 
                 if (--nready <= 0)
@@ -218,7 +154,8 @@ int main()
                     break;
                 }
             }
-            fds[i].fd = -1;
+			close(connfd);
+			fds[i].fd = -1;
         }
     }
 

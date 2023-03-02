@@ -14,7 +14,24 @@ ConfigParser::ConfigParser()
 		this->exit_with_error(1, in_file);
 	
 	// Check if server context exists
-//	std::cout << line << std::endl;
+	if (this->check_server_context(in_file) == false)
+		this->exit_with_error(this->get_error_code(), in_file);
+}
+
+ConfigParser::ConfigParser(std::string config_file)
+{
+	std::ifstream in_file;
+	
+	this->set_error_code(0);
+	this->set_n_servers(0);
+	//this->_config = new std::vector<Config>;
+	
+	// Check if config file exists
+	in_file.open(config_file.c_str(), std::ios::in);
+	if (in_file.fail() == true)
+		this->exit_with_error(1, in_file);
+	
+	// Check if server context exists
 	if (this->check_server_context(in_file) == false)
 		this->exit_with_error(this->get_error_code(), in_file);
 }
@@ -74,6 +91,10 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			this->clean_listen(line);
 		else if ((context && line.find(HOST) != std::string::npos) && this->check_def_format(HOST, line))
 			this->clean_host(line);
+		else if ((context && line.find(ROOT) != std::string::npos) && this->check_def_format(ROOT, line))
+			this->clean_root(line);
+			else if ((context && line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
+			this->clean_index(line);
 		else if ((context && line.find(ERROR_PAGE) != std::string::npos) && this->check_def_format(ERROR_PAGE, line))
 			this->clean_error_page(line);
 		else if ((context && line.find(SERVER_NAME) != std::string::npos) && this->check_def_format(SERVER_NAME, line))
@@ -142,6 +163,7 @@ std::string ConfigParser::find_int(std::string line)
 	return line;
 }
 
+// TODO what if there are multiple listens
 void ConfigParser::clean_listen(std::string line)
 {
 	line = this->find_int(line);
@@ -164,7 +186,12 @@ void ConfigParser::clean_error_page(std::string line)
 	line = this->find_int(line);
 	if (line.size() == 0)
 		this->set_error_code(5);
-	std::size_t pos = line.find_first_of("/");
+	std::size_t pos;
+	pos = line.find_first_not_of(" \r\t\b\f");
+	pos = line.find_first_of(" \r\t\b\f", pos);
+	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	if (line[pos] == '/')
+		pos += 1;
 	std::string path = &line[pos];
 	pos = line.find_first_of(" ");
 	line.erase(pos);
@@ -202,6 +229,8 @@ void ConfigParser::clean_root(std::string line)
 	line = this->get_value(line);
 	if (line.size() == 0)
 		this->set_error_code(9);
+	if (line[line.size() - 1] != '/')
+		line = line + "/";
 	this->get_config(this->get_n_servers() - 1).set_root(line);
 }
 
@@ -385,35 +414,35 @@ int			ConfigParser::get_method_num(std::string method)
 int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 {
 	if (err_code == 1)
-		std::cout << RED << NO_DEFAULT_CONFIG << RESET << std::endl;
+		std::cerr << RED << NO_DEFAULT_CONFIG << RESET << std::endl;
 	else if (err_code == 2)
-		std::cout << RED << NO_VALID_SERVER << RESET << std::endl;
+		std::cerr << RED << NO_VALID_SERVER << RESET << std::endl;
 	else if (err_code == 3)
-		std::cout << RED << NO_VALID_PORT << RESET << std::endl;
+		std::cerr << RED << NO_VALID_PORT << RESET << std::endl;
 	else if (err_code == 4)
-		std::cout << RED << NO_VALID_HOST << RESET << std::endl;
+		std::cerr << RED << NO_VALID_HOST << RESET << std::endl;
 	else if (err_code == 5)
-		std::cout << RED << NO_VALID_ERROR_PAGE << RESET << std::endl;
+		std::cerr << RED << NO_VALID_ERROR_PAGE << RESET << std::endl;
 	else if (err_code == 6)
-		std::cout << RED << NO_VALID_SERVER_NAME << RESET << std::endl;
+		std::cerr << RED << NO_VALID_SERVER_NAME << RESET << std::endl;
 	else if (err_code == 7)
-		std::cout << RED << NO_VALID_CLIENT_MAX_BODY_SIZE << RESET << std::endl;
+		std::cerr << RED << NO_VALID_CLIENT_MAX_BODY_SIZE << RESET << std::endl;
 	else if (err_code == 8)
-		std::cout << RED << NO_VALID_AUTOINDEX << RESET << std::endl;
+		std::cerr << RED << NO_VALID_AUTOINDEX << RESET << std::endl;
 	else if (err_code == 9)
-		std::cout << RED << NO_VALID_ROOT << RESET << std::endl;
+		std::cerr << RED << NO_VALID_ROOT << RESET << std::endl;
 	else if (err_code == 10)
-		std::cout << RED << NO_VALID_INDEX << RESET << std::endl;
+		std::cerr << RED << NO_VALID_INDEX << RESET << std::endl;
 	else if (err_code == 11)
-		std::cout << RED << NO_VALID_LOCATION << RESET << std::endl;
+		std::cerr << RED << NO_VALID_LOCATION << RESET << std::endl;
 	else if (err_code == 12)
-		std::cout << RED << NO_VALID_CGI << RESET << std::endl;
+		std::cerr << RED << NO_VALID_CGI << RESET << std::endl;
 	else if (err_code == 13)
-		std::cout << RED << NO_VALID_METHODS<< RESET << std::endl;
+		std::cerr << RED << NO_VALID_METHODS<< RESET << std::endl;
 	else if (err_code == 14)
-		std::cout << RED << NO_VALID_CGI_PATH << RESET << std::endl;
+		std::cerr << RED << NO_VALID_CGI_PATH << RESET << std::endl;
 	else if (err_code == 15)
-		std::cout << RED << NO_VALID_CGI_EXT << RESET << std::endl;
+		std::cerr << RED << NO_VALID_CGI_EXT << RESET << std::endl;
 	in_file.close();
 	return(err_code);
 }

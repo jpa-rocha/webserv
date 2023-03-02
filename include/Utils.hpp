@@ -1,6 +1,20 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
+
+
+#include <iostream>
+#include <string>
+#include <map>
+#include <iterator>
+#include "httpHeader.hpp"
+#include <fstream>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cstdlib> //for malloc
+
+const int MAX_CONN = 5;
+
 /*
 
 	Colors
@@ -17,32 +31,21 @@
 # define CYAN    "\033[36m"
 # define WHITE   "\033[37m"
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <iterator>
-#include "httpHeader.hpp"
-#include <fstream>
-#include <sys/socket.h>
 
-
-enum httpMethods 
-{
-	GET,
-	POST,
-	DELETE,
-	PUT,
-	HEAD,
-	OPTIONS,
-	TRACE,
-	CONNECT,
-	NONE
-};
 /*
 
 	Error Messages
 
 */
+
+// Too many arguments
+# define TOO_MANY_ARGS "ERROR: --- Too many arguments ---\nCorrect use: ./webserv [optional config]"
+
+// Error in 404
+# define	_404_ERROR "error opening 404 file\n"
+
+// Error in response sending
+# define _RES_ERROR "error while sending the response"
 
 // error_code 1
 # define NO_DEFAULT_CONFIG "ERROR: --- Could not find default configuration file at: ./webserver.config ---"
@@ -88,5 +91,18 @@ enum httpMethods
 
 // error_code 15
 # define NO_VALID_CGI_EXT "ERROR: --- Could not find a valid ** cgi_ext ** configuration ---"
+
+// error_code 16
+# define SOCK_ERROR "ERROR: --- Could not create socket ---"
+
+// error_code 17
+# define SOCK_OPT_ERROR "ERROR: --- Could not set socket options ---"
+
+// error_code 18
+# define BIND_ERROR "ERROR: --- Could not bind socket ---"
+
+// error_code 19
+# define LISTEN_ERROR "ERROR: --- Could not listen on socket fd---"
+
 
 #endif

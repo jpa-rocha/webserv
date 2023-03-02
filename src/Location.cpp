@@ -14,6 +14,7 @@ Location::Location()
 	this->_methods.insert(std::make_pair(4, false));
 	this->_methods.insert(std::make_pair(5, false));
 	this->_methods.insert(std::make_pair(6, false));
+	this->_methods.insert(std::make_pair(7, false));
 	this->_alias = "";
 	this->_redirection = "";
 }
@@ -60,6 +61,8 @@ bool										Location::check_method_at(short method)
 
 void										Location::set_root(std::string	root)
 {
+	if (root[root.size() - 1] != '/')
+		root = root + "/";
 	this->_root = root;
 }
 

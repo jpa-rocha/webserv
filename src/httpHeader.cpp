@@ -18,9 +18,9 @@ httpHeader::httpHeader(std::string header)
 
 	std::string methods[9] = {"GET", "POST", "DELETE", "PUT", \
 		"HEAD", "OPTIONS", "TRACE", "CONNECT", "NONE"};
-	for (int i = 0; i < 9; i++)
+	for (int j = 0; j < 9; j++)
 	{
-		if (tmp_method == methods[i])
+		if (tmp_method == methods[j])
 			break;
 	}
 

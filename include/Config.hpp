@@ -32,6 +32,8 @@
 			in_addr_t							&get_host();                  
   			std::string							&get_server_name();
  			std::map<int, std::string>			&get_default_error();
+			// TODO what if its empty;
+			std::string							&get_error_path(int error);
   			int 								&get_client_max_body_size();
 			bool								&get_autoindex();
   			std::string							&get_root();

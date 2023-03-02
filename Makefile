@@ -24,11 +24,13 @@ SRCDIR =		./src/
 ################################## SRCS & SRCS #################################
 ################################################################################
 
-SRCS	=	$(SRCDIR)webserv.cpp		\
-			$(SRCDIR)Config.cpp			\
+SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)ConfigParser.cpp	\
-			$(SRCDIR)Location.cpp	\
-			$(SRCDIR)CGI.cpp	\
+			$(SRCDIR)Location.cpp		\
+			$(SRCDIR)CGI.cpp			\
+			$(SRCDIR)httpHeader.cpp		\
+			$(SRCDIR)Server.cpp			\
+			$(SRCDIR)simple_server.cpp		
 
 ################################################################################
 #################################### PROGRAM ###################################
