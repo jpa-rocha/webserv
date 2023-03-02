@@ -14,6 +14,29 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 	struct pollfd fds[MAX_CONN * this->_servers.size()];
     this->pollfd_init(fds);
 	this->_nfds = this->_servers.size();
+	this->run_servers(fds);
+	
+
+}
+
+ServerManager::~ServerManager() {}
+
+void ServerManager::pollfd_init(struct pollfd* fds)
+{
+	for (size_t i = 0; i < this->_configs.size(); i++)
+    {
+        fds[i].fd = this->_servers[i].get_sockfd();
+        fds[i].events = POLLIN;
+    }
+	for (size_t i = this->_servers.size(); i < MAX_CONN * this->_servers.size(); i++)
+    {
+        fds[i].fd = -1;
+        fds[i].events = -1;
+    }
+}
+
+int ServerManager::run_servers(struct pollfd* fds)
+{
 	while (true)
     {
         int nready = poll(fds, this->_nfds, -1);
@@ -21,8 +44,11 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
         {
             perror("poll");
 			// TODO return error
-            return ;
+            return 1;
         }
+
+
+
         //Check for new connection
         for (size_t i = 0; i < this->_servers.size(); i++)
         {
@@ -35,7 +61,7 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
                 {
                     perror("accept");
                     // TODO return error
-            		return ;
+            		return 1;
                 }
 
                std::cout << GREEN << "Received new connection\n" << RESET << std::endl;
@@ -66,8 +92,13 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
                 }
             }
         }
+
+
+
         if (!nready)
             continue ;
+
+			
         //Check for data on all connections
         for (size_t i = this->_servers.size(); i < this->_nfds; i++)
         {
@@ -100,12 +131,9 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
                 }
                 else
                 {
-                    //make object of class
-					//print function of class
                     httpHeader request(buff);
                     request.printHeader();
 					memset(buff, 0, 1024);
-					//std::cout << GREEN << request.getUri() << RESET << std::endl;
 					this->_servers[0].send_response(connfd, request.getUri());
                 }
 
@@ -114,25 +142,11 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
                     break;
                 }
             }
+
+			
 			close(connfd);
 			fds[i].fd = -1;
         }
     }
-
-}
-
-ServerManager::~ServerManager() {}
-
-void ServerManager::pollfd_init(struct pollfd* fds)
-{
-	for (size_t i = 0; i < this->_configs.size(); i++)
-    {
-        fds[i].fd = this->_servers[i].get_sockfd();
-        fds[i].events = POLLIN;
-    }
-	for (size_t i = this->_servers.size(); i < MAX_CONN * this->_servers.size(); i++)
-    {
-        fds[i].fd = -1;
-        fds[i].events = -1;
-    }
+	return EXIT_SUCCESS;
 }

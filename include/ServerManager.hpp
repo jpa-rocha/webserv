@@ -20,7 +20,8 @@ class ServerManager {
 
         ~ServerManager();
 
-		void pollfd_init(struct pollfd* fds);
+		void 	pollfd_init(struct pollfd* fds);
+		int		run_servers(struct pollfd* fds);
 
 };
 
