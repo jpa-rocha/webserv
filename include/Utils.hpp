@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cstdlib> //for malloc
+#include "minilib.hpp" //our functions
 
 const int MAX_CONN = 5;
 

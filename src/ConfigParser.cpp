@@ -42,9 +42,14 @@ ConfigParser::~ConfigParser()
 	//  	delete this->_config[i];
 }
 
+std::vector<Config>	ConfigParser::get_configs()
+{
+	return this->_config;
+}
+
 Config& ConfigParser::get_config(int i)
 {
-	return (this->_config.at(i));
+	return this->_config.at(i);
 }
 
 int ConfigParser::get_error_code()
