@@ -30,6 +30,7 @@ SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)CGI.cpp			\
 			$(SRCDIR)httpHeader.cpp		\
 			$(SRCDIR)Server.cpp			\
+			$(SRCDIR)ServerManager.cpp	\
 			$(SRCDIR)main.cpp		
 
 ################################################################################

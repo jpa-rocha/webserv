@@ -12,8 +12,8 @@
 #include <sstream>
 #include "../include/Utils.hpp"
 #include "../include/httpHeader.hpp"
-#include "../include/ConfigParser.hpp"
-#include "../include/Server.hpp"
+//#include "../include/ConfigParser.hpp"
+#include "../include/ServerManager.hpp"
 
 
 int main(int argc, char** argv)
@@ -22,42 +22,50 @@ int main(int argc, char** argv)
 		std::cerr << RED << TOO_MANY_ARGS << RESET << std::endl;
 		return EXIT_FAILURE;
 	}
-	ConfigParser config;
+	ConfigParser configs;
 
 	if (argc == 2) {
-		config = ConfigParser(argv[1]);
+		configs = ConfigParser(argv[1]);
 	}
 	else {
-	 	if (config.get_error_code() != 0)
+	 	if (configs.get_error_code() != 0)
 	 		return EXIT_FAILURE;
-		Config configs = config.get_config(0);
 	}
 
-    std::vector<Server> servers;
+	ServerManager manager(configs.get_configs());
+
+   /*  std::vector<Server> servers;
     for (int i = 0; i < config.get_n_servers(); i++)
     {
         Server server = Server(config.get_config(i));
         if (server.getError() != 0)
             continue ;
         servers.push_back(server);
-    }
+    } */
 
     //initialize poll
-    struct pollfd fds[MAX_CONN * config.get_n_servers()];
+   /*  struct pollfd fds[MAX_CONN * config.get_n_servers()];
     for (int i = 0; i < config.get_n_servers(); i++)
     {
         fds[i].fd = servers[i].get_sockfd();
         fds[i].events = POLLIN;
     }
-
-    for (int i = config.get_n_servers(); i < MAX_CONN * config.get_n_servers(); i++)
+	for (int i = config.get_n_servers(); i < MAX_CONN * config.get_n_servers(); i++)
     {
         fds[i].fd = -1;
-    }
+        fds[i].events = -1;
+    } */
+	
+	// TODO might be handled by lines 53-56
+    /* for (int i = config.get_n_servers(); i < MAX_CONN * config.get_n_servers(); i++)
+    {
+        fds[i].fd = -1;
+    } */
 
-    int nfds = servers.size();
 
-    while (true)
+  /*   int nfds = servers.size(); */
+
+    /* while (true)
     {
         int nready = poll(fds, nfds, -1);
         if (nready == -1)
@@ -122,6 +130,7 @@ int main(int argc, char** argv)
             {
 		        int n;
                 char buff[servers[0].get_config().get_client_max_body_size()];
+				memset(buff, 0, 1024);
                 n = read(connfd, buff, sizeof(buff));            
                 std::cout << "read return: " << n << std::endl;
                 if ( n < 0 )
@@ -157,7 +166,7 @@ int main(int argc, char** argv)
 			close(connfd);
 			fds[i].fd = -1;
         }
-    }
+    } */
 
-    return 0;
+    return EXIT_SUCCESS;
 }
