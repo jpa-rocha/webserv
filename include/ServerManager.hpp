@@ -11,6 +11,8 @@ class ServerManager {
 		std::vector<Server> _servers;
 		std::vector<Config> _configs;
 		size_t				_nfds;
+		struct pollfd*		_fds;
+		int					_nready;
 
         // 	ServerManager(ServerManager const &copy);
         //  ServerManager &operator=(ServerManager const &rhs);
@@ -20,8 +22,10 @@ class ServerManager {
 
         ~ServerManager();
 
-		void 	pollfd_init(struct pollfd* fds);
-		int		run_servers(struct pollfd* fds);
+		void 	pollfd_init();
+		int		run_servers();
+		int		check_connection();
+		int		check_request_respond();
 
 };
 
