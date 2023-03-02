@@ -12,7 +12,6 @@ Server::Server(Config config): _config(config), _error(0)
 }
 
 Server::~Server() {}
-/* ---------- GETTERS ---------- */
 
 int	Server::init_socket()
 {
@@ -57,6 +56,8 @@ int	Server::listen_socket()
 	return EXIT_SUCCESS;
 }
 
+
+/* ---------- GETTERS ---------- */
 int	Server::getError() const
 {
 	return _error;
