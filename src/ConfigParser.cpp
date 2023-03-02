@@ -10,8 +10,10 @@ ConfigParser::ConfigParser()
 	
 	// Check if config file exists
 	in_file.open("./webserv.config", std::ios::in);
-	if (in_file.fail() == true)
+	if (in_file.fail() == true) {
 		this->exit_with_error(1, in_file);
+		return;
+	}
 	
 	// Check if server context exists
 	if (this->check_server_context(in_file) == false)
@@ -28,8 +30,10 @@ ConfigParser::ConfigParser(std::string config_file)
 	
 	// Check if config file exists
 	in_file.open(config_file.c_str(), std::ios::in);
-	if (in_file.fail() == true)
+	if (in_file.is_open() == false){
 		this->exit_with_error(1, in_file);
+		return;
+	};
 	
 	// Check if server context exists
 	if (this->check_server_context(in_file) == false)
@@ -90,8 +94,11 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			context += 1;
 			this->_config.push_back(Config());
 		}
-		else if (context == 0)
+		else if (context == 0) {
+			this->set_error_code(2);
 			return false;
+		}
+		// TODO server might need to listen on more than one port
 		if ((context && line.find(LISTEN) != std::string::npos) && this->check_def_format(LISTEN, line))
 			this->clean_listen(line);
 		else if ((context && line.find(HOST) != std::string::npos) && this->check_def_format(HOST, line))
@@ -120,6 +127,9 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 				this->clean_cgi(config_file, line);
 			else
 				this->clean_location(config_file, line);
+			if (this->get_error_code() != 0)
+				return false;
+			context -= 1;
 		}
 		if (line.find("}") != std::string::npos && context > 0)
 			context -= 1;
@@ -130,14 +140,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 		
 		*/	
 	}
-	//std::cout << _n_servers << std::endl;
-	//std::cout << this->get_config(0).get_cgi() << std::endl;
-	// std::cout << "output" << std::endl;
-	// std::cout << this->get_config(0).get_cgi().get_path().at("python3") << std::endl;
-	// std::cout << this->get_config(0).get_cgi().get_path().at("bash") << std::endl;
-	// std::cout << this->get_config(0).get_cgi().get_ext().at(0) << std::endl;
-	// std::cout << this->get_config(0).get_cgi().get_ext().at(1) << std::endl;
-	// std::cout << this->get_config(0).get_cgi().get_root() << std::endl;
+
 	if (context == 0 && this->get_error_code() == 0)
 		return true;
 	return false;
@@ -449,5 +452,6 @@ int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 	else if (err_code == 15)
 		std::cerr << RED << NO_VALID_CGI_EXT << RESET << std::endl;
 	in_file.close();
+	this->set_error_code(err_code);
 	return(err_code);
 }

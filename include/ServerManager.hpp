@@ -13,7 +13,7 @@ class ServerManager {
 		size_t				_nfds;
 		struct pollfd*		_fds;
 		int					_nready;
-
+		std::map<int, int>	_map_server_fd;
         // 	ServerManager(ServerManager const &copy);
         //  ServerManager &operator=(ServerManager const &rhs);
     
