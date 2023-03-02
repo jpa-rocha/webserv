@@ -8,7 +8,7 @@ CFLAGS	=	-Wall -Wextra -Werror -Wshadow -std=c++98
 
 DEBUG =		-Wall -Wextra -Werror -g -std=c++98 
 
-VAL =		valgrind -s --leak-check=full --show-leak-kinds=all
+VAL =		valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes
 
 ################################################################################
 ################################### LIBRARIES ##################################
@@ -30,7 +30,7 @@ SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)CGI.cpp			\
 			$(SRCDIR)httpHeader.cpp		\
 			$(SRCDIR)Server.cpp			\
-			$(SRCDIR)simple_server.cpp		
+			$(SRCDIR)main.cpp		
 
 ################################################################################
 #################################### PROGRAM ###################################
@@ -62,6 +62,10 @@ fclean:		clean
 		rm -f $(EXEC)
 
 re:			fclean all
+
+
+launch: re debug
+	$(RUN)
 
 test: debug
 	$(VAL) $(RUN)
