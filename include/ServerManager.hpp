@@ -3,7 +3,7 @@
 
 #include <poll.h>
 # include "Server.hpp"
-# include "ConfigParser.hpp"
+# include "Config.hpp"
 
 class ServerManager {
 	

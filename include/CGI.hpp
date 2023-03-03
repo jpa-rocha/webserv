@@ -5,6 +5,7 @@
 # include <vector>
 # include <map>
 # include <iostream>
+# include "Utils.hpp"
 
 class CGI {
 	private:
@@ -23,6 +24,8 @@ class CGI {
 		std::string								get_root() const;
 		std::map<std::string, std::string>		get_path() const;
 		std::vector<std::string>				get_ext() const; 
+
+		int										cgi_check();
 };
 
 std::ostream &operator<<(std::ostream &os, const CGI &cgi);

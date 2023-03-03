@@ -45,7 +45,6 @@ int ServerManager::run_servers()
         if (this->_nready == -1)
         {
             perror("poll");
-			// TODO return error
             return 1;
         }
 
@@ -72,7 +71,6 @@ int		ServerManager::check_connection()
                 if ((connfd = accept(this->_servers[server_num].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
                 {
                     perror("accept");
-                    // TODO return error
             		return 1;
                 }
 

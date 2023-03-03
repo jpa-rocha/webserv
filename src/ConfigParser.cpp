@@ -86,7 +86,6 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 		if (line.find_first_not_of(" \r\t\b\f") == std::string::npos)
 			continue;
 		
-		// // TODO server should be the top element
 		if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && line.find("}") != std::string::npos)
 			return false;
 		else if ((line.find("server") != std::string::npos && this->check_def_format("server", line) && line.find("{") != std::string::npos) && context == 0) {
@@ -105,7 +104,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			this->clean_host(line);
 		else if ((context && line.find(ROOT) != std::string::npos) && this->check_def_format(ROOT, line))
 			this->clean_root(line);
-			else if ((context && line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
+		else if ((context && line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
 			this->clean_index(line);
 		else if ((context && line.find(ERROR_PAGE) != std::string::npos) && this->check_def_format(ERROR_PAGE, line))
 			this->clean_error_page(line);
@@ -188,7 +187,6 @@ void ConfigParser::clean_host(std::string line)
 	this->get_config(this->get_n_servers() - 1).set_host(inet_addr(line.c_str()));
 }
 
-// TODO break if there is no value
 void ConfigParser::clean_error_page(std::string line)
 {
 	line = this->find_int(line);
@@ -201,6 +199,10 @@ void ConfigParser::clean_error_page(std::string line)
 	if (line[pos] == '/')
 		pos += 1;
 	std::string path = &line[pos];
+	if (path.size() == 0) {
+		this->set_error_code(5);
+		return;
+	} 
 	pos = line.find_first_of(" ");
 	line.erase(pos);
 	this->get_config(this->get_n_servers() - 1).set_default_error(this->to_int(line), path);
