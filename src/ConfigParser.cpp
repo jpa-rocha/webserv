@@ -104,7 +104,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			this->clean_host(line);
 		else if ((context && line.find(ROOT) != std::string::npos) && this->check_def_format(ROOT, line))
 			this->clean_root(line);
-			else if ((context && line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
+		else if ((context && line.find(INDEX) != std::string::npos) && this->check_def_format(INDEX, line))
 			this->clean_index(line);
 		else if ((context && line.find(ERROR_PAGE) != std::string::npos) && this->check_def_format(ERROR_PAGE, line))
 			this->clean_error_page(line);

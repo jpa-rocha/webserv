@@ -91,6 +91,41 @@ void										Location::set_alias(std::string	alias)
 	this->_alias = alias;
 }
 
+int								Location::check_location()
+{
+	// root check
+	if (this->get_root().size() == 0) {
+		// TODO print error
+		return 25;
+	}
+	if (dir_exists(this->get_root()) == false) {
+		return 26;
+	}
+
+	// index check
+	if (this->get_index().size() == 0) {
+		// TODO print error
+		return 27;
+	}
+	if (file_exists(this->get_root() + this->get_index()) == false) {
+		// TODO print error
+		return 28;
+	}
+
+
+	// methods check
+	std::map<short, bool> methods = this->get_methods();
+	int method_check = 0;
+	for (std::map<short, bool>::iterator it = methods.begin(); it != methods.end(); it++) {
+		if (it->second == true)
+			method_check = 1;
+			// TODO print error
+	}
+	if (method_check == 0)
+		return 29;
+	return EXIT_SUCCESS;
+}
+
 std::ostream &operator<<(std::ostream &os, Location &location)
 {
 	os << location.get_root() << std::endl;

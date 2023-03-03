@@ -163,6 +163,7 @@ void					Config::set_cgi(CGI &cgi)
 //TODO is config valid check
 int						Config::check_config()
 {
+	// root check
 	if (this->get_root().size() == 0) {
 		this->set_error_code(20);
 		// TODO print error
@@ -172,6 +173,8 @@ int						Config::check_config()
 		this->set_error_code(21);
 		return 21;
 	}
+
+	// index check
 	if (this->get_index().size() == 0) {
 		this->set_error_code(22);
 		// TODO print error
@@ -179,16 +182,35 @@ int						Config::check_config()
 	}
 	if (file_exists(this->get_root() + this->get_index()) == false) {
 		this->set_error_code(23);
+		// TODO print error
 		return 23;
 	}
+
+	// default error check
 	std::map<int, std::string> error = this->get_default_error();
 	for (std::map<int, std::string>::iterator it = error.begin(); it != error.end(); it++) {
 		if (file_exists(this->get_root() + it->second) == false) {
 			this->set_error_code(24);
+			// TODO print error
 			return 24;
 		}
 	}
-	return EXIT_SUCCESS;
+
+	// Location check
+	std::map<std::string, Location> location = this->get_location();
+	for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); it++) {
+		int error_code = it->second.check_location();
+		if (error_code != EXIT_SUCCESS) {
+			this->set_error_code(error_code);
+			return error_code;
+		}
+	}
+	
+	// CGI check
+	this->set_error_code(this->get_cgi().cgi_check());
+
+
+	return this->get_error_code();
 }
 
 std::ostream& operator<<(std::ostream& os, Config& config)

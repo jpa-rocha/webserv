@@ -52,6 +52,20 @@ void										CGI::set_ext(std::string ext)
 	this->_ext.push_back(ext);
 }
 
+int											CGI::cgi_check()
+{
+	// root check
+	if (this->get_root().size() == 0) {
+		// TODO print error
+		return 30;
+	}
+	if (dir_exists(this->get_root()) == false) {
+		return 31;
+	}
+	return EXIT_SUCCESS;
+}
+
+
 std::ostream &operator<<(std::ostream &os, const CGI &cgi)
 {
 	//os << cgi.get_root() << std::endl;

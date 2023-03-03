@@ -34,10 +34,14 @@ int main(int argc, char** argv)
 		test
 	*/
 	
-	if (configs.get_config(0).check_config() != 0) {
+	if (configs.get_config(1).check_config() != 0) {
 		std::cout << YELLOW << configs.get_config(0).check_config() << RESET << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	/*
+		end
+	*/
 	ServerManager manager(configs.get_configs());
 
     return EXIT_SUCCESS;

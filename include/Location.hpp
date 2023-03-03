@@ -4,6 +4,7 @@
 # include <string>
 # include <map>
 # include <iostream>
+# include "Utils.hpp"
 
 	class Location {
 		private:
@@ -34,7 +35,8 @@
       		std::string						get_redirection();
      	 	std::string						get_alias();
 
-			bool							check_method_at(short method);  
+			bool							check_method_at(short method);
+			int								check_location();
 
 	};
 	std::ostream& operator<<(std::ostream& os, Location& location);
