@@ -1,16 +1,15 @@
 #include "../include/Config.hpp"
 
 
-Config::Config()
+Config::Config(): _error_code(0)
 {
-	this->set_port(8001);
+	this->set_port(8000);
 	this->set_host(inet_addr("127.0.0.1"));
-	this->set_server_name("test");
-	//this->set_default_error(404, "error/404_NotFound.html");
+	this->set_server_name("default");
 	this->set_client_max_body_size(1024);
 	this->set_autoindex(false);
-	this->set_root("./root");
-	this->set_index("./root/index.html");
+	this->set_root("");
+	this->set_index("");
 }
 
 Config::Config(const Config& obj)
@@ -32,6 +31,12 @@ Config &Config::operator=(const Config& obj)
 	}
 	return *this;
 }
+
+Config::~Config()
+{
+
+}
+
 // Getters
 
 u_int16_t					&Config::get_port()
@@ -90,7 +95,18 @@ CGI									&Config::get_cgi()
 	return this->_cgi;
 }
 
+int 								Config::get_error_code()
+{
+	return this->_error_code;
+}
+
+
 // Setters
+
+void 					Config::set_error_code(int error_code)
+{
+	this->_error_code = error_code;
+}
 
 void					Config::set_port(u_int16_t port)
 {
@@ -144,6 +160,37 @@ void					Config::set_cgi(CGI &cgi)
 	this->_cgi = cgi;
 }
 
+//TODO is config valid check
+int						Config::check_config()
+{
+	if (this->get_root().size() == 0) {
+		this->set_error_code(20);
+		// TODO print error
+		return 20;
+	}
+	if (dir_exists(this->get_root()) == false) {
+		this->set_error_code(21);
+		return 21;
+	}
+	if (this->get_index().size() == 0) {
+		this->set_error_code(22);
+		// TODO print error
+		return 22;
+	}
+	if (file_exists(this->get_root() + this->get_index()) == false) {
+		this->set_error_code(23);
+		return 23;
+	}
+	std::map<int, std::string> error = this->get_default_error();
+	for (std::map<int, std::string>::iterator it = error.begin(); it != error.end(); it++) {
+		if (file_exists(this->get_root() + it->second) == false) {
+			this->set_error_code(24);
+			return 24;
+		}
+	}
+	return EXIT_SUCCESS;
+}
+
 std::ostream& operator<<(std::ostream& os, Config& config)
 {
 	os << config.get_port() << std::endl;
@@ -160,9 +207,4 @@ std::ostream& operator<<(std::ostream& os, Config& config)
 os << this-> << std::endl;
 	os << this-> << std::endl; */
 	
-}
-
-Config::~Config()
-{
-
 }

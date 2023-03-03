@@ -5,8 +5,10 @@
 #include <vector>
 #include <map>
 #include <iostream>
+# include <stdlib.h>
 #include "Location.hpp"
 #include "CGI.hpp"
+#include "minilib.hpp"
 
 	class Config {
 		private:
@@ -20,11 +22,12 @@
  			std::map<int, std::string>			_default_error;
   			std::map<std::string, Location>		_location;
 			CGI									_cgi;
+			int									_error_code;
+
 		public:
 			Config();
 			Config(const Config& obj);
 			~Config();
-			//Config(bool test);
 			Config& operator=(const Config& obj);
 
 			// getters
@@ -32,7 +35,6 @@
 			in_addr_t							&get_host();                  
   			std::string							&get_server_name();
  			std::map<int, std::string>			&get_default_error();
-			// TODO what if its empty;
 			std::string							&get_error_path(int error);
   			int 								&get_client_max_body_size();
 			bool								&get_autoindex();
@@ -40,8 +42,11 @@
   			std::string							&get_index();
   			std::map<std::string, Location>		&get_location();
 			CGI									&get_cgi();
+			int									get_error_code();
 
+		
 			// setters
+			void					set_error_code(int error_code);
 			void					set_port(u_int16_t port);
 			void					set_host(in_addr_t host);                  
   			void					set_server_name(std::string server_name);
@@ -52,6 +57,8 @@
   			void					set_index(std::string index);
   			void					set_location(std::string key, Location location);
 			void					set_cgi(CGI &cgi);
+
+			int						check_config();
 
 			// Utils
 
