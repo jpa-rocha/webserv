@@ -32,6 +32,26 @@ const int MAX_CONN = 5;
 # define CYAN    "\033[36m"
 # define WHITE   "\033[37m"
 
+/*
+
+	Config keywords
+
+*/
+
+# define LISTEN "listen"
+# define HOST "host"
+# define SERVER_NAME "server_name"
+# define ERROR_PAGE	"error_page"
+# define ALLOW_METHODS "allow_methods"
+# define CLIENT_MAX_BODY "client_max_body_size"									  
+# define ROOT "root"
+# define INDEX "index"
+# define ALIAS "alias"
+# define AUTOINDEX "autoindex"
+# define RETURN "return"
+# define CGI_EXT "cgi_ext"
+# define CGI_PATH "cgi_path"
+
 
 /*
 

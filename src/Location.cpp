@@ -7,16 +7,36 @@ Location::Location()
 	this->_autoindex = false;
 	// needs to be included later
 	// TODO chage to get on merge
-	this->_methods.insert(std::make_pair(0, false));
-	this->_methods.insert(std::make_pair(1, false));
-	this->_methods.insert(std::make_pair(2, false));
-	this->_methods.insert(std::make_pair(3, false));
-	this->_methods.insert(std::make_pair(4, false));
-	this->_methods.insert(std::make_pair(5, false));
-	this->_methods.insert(std::make_pair(6, false));
-	this->_methods.insert(std::make_pair(7, false));
+	this->init_methods();
 	this->_alias = "";
 	this->_redirection = "";
+}
+
+Location::Location(std::ifstream &config_file, std::string line)
+{
+	int	exit_context = 0;
+
+	this->init_methods();
+	while (exit_context == 0 && getline(config_file, line)) {
+		line = remove_comments(line);
+		if (line.find("}") != std::string::npos)
+			exit_context = 1;
+		if ((line.find(ROOT) != std::string::npos) && check_def_format(ROOT, line))
+			this->set_root(get_value(line));
+		if ((line.find(AUTOINDEX) != std::string::npos) && check_def_format(AUTOINDEX, line))
+			this->set_autoindex(clean_loc_autoindex(line));
+		if ((line.find(ALLOW_METHODS) != std::string::npos) && check_def_format(ALLOW_METHODS, line))
+			this->clean_methods(line);
+		if ((line.find(INDEX) != std::string::npos) && check_def_format(INDEX, line))
+			this->set_index(get_value(line));
+		if ((line.find(ALIAS) != std::string::npos)  && check_def_format(ALIAS, line))
+			this->set_alias(get_value(line));
+		if ((line.find(RETURN) != std::string::npos)  && check_def_format(RETURN, line))
+			this->set_redirection(get_value(line));
+	}	
+	if (exit_context != 1 || (this->get_index().empty() || this->get_root().empty()))
+		set_error_code(11);
+	this->set_error_code(0);
 }
 
 std::string									Location::get_root()
@@ -55,6 +75,16 @@ bool										Location::check_method_at(short method)
 		return false;
 	else
 	 	return this->_methods.at(method);
+}
+
+int Location::get_error_code()
+{
+	return this->_error_code;
+}
+
+void Location::set_error_code(int error_code)
+{
+	this->_error_code = error_code;
 }
 
 // Setters
@@ -112,6 +142,9 @@ int								Location::check_location()
 		return 28;
 	}
 
+	if (this->get_redirection().size() > 0 && dir_exists(this->get_redirection()) == false) {
+		return 29;
+	}
 
 	// methods check
 	std::map<short, bool> methods = this->get_methods();
@@ -122,8 +155,48 @@ int								Location::check_location()
 			// TODO print error
 	}
 	if (method_check == 0)
-		return 29;
+		return 30;
 	return EXIT_SUCCESS;
+}
+
+bool 								Location::clean_loc_autoindex(std::string line)
+{
+	if (line.find("on") != std::string::npos)
+		return true;
+	return false;
+}
+
+void				Location::clean_methods(std::string line)
+{
+	line = remove_end(line, ';');
+	size_t pos = 0;
+	size_t pos2 = 0;
+	line = remove_end(line, ';');
+	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	pos = line.find_first_of(" \r\t\b\f", pos);
+	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	while (pos != std::string::npos) {
+		pos = line.find_first_not_of(" \r\t\b\f", pos);
+		pos2 = line.find_first_of(" \r\t\b\f", pos);
+		if  (get_method_num(line.substr(pos, pos2 - pos)) < 0)
+			this->set_error_code(13);
+		this->set_methods(get_method_num(line.substr(pos, pos2 - pos)), 1);
+		pos = pos2;
+	}
+	if (this->get_methods().empty())
+		this->set_error_code(13);
+}
+
+void							Location::init_methods()
+{
+	this->_methods.insert(std::make_pair(0, false));
+	this->_methods.insert(std::make_pair(1, false));
+	this->_methods.insert(std::make_pair(2, false));
+	this->_methods.insert(std::make_pair(3, false));
+	this->_methods.insert(std::make_pair(4, false));
+	this->_methods.insert(std::make_pair(5, false));
+	this->_methods.insert(std::make_pair(6, false));
+	this->_methods.insert(std::make_pair(7, false));
 }
 
 std::ostream &operator<<(std::ostream &os, Location &location)

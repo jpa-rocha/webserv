@@ -25,6 +25,7 @@ int main(int argc, char** argv)
 	ConfigParser configs;
 
 	if (argc == 2) {
+		// TODO assignment operator
 		configs = ConfigParser(argv[1]);
 	}
 	if (configs.get_error_code() != 0)
@@ -34,10 +35,10 @@ int main(int argc, char** argv)
 		test
 	*/
 	
-	if (configs.get_config(1).check_config() != 0) {
-		std::cout << YELLOW << configs.get_config(0).check_config() << RESET << std::endl;
-		return EXIT_FAILURE;
-	}
+		if (configs.get_config(0).check_config() != 0) {
+			std::cout << YELLOW << configs.get_config(0).check_config() << RESET << std::endl;
+			return EXIT_FAILURE;
+		}
 
 	/*
 		end

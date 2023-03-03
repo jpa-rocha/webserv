@@ -41,3 +41,81 @@ bool		file_exists(std::string file)
 	in_file.close();
 	return true;
 }
+
+bool	check_def_format(std::string def, std::string line)
+{
+	size_t pos = line.find(def);
+	if ((pos == 0 || pos == line.find_first_not_of(" \r\t\b\f")) 
+		&& line.find_first_of(" \r\t\b\f", pos) - pos == def.size())
+		return true;
+	return false;
+}
+
+std::string remove_end(std::string line, char symbol)
+{
+	if (line.find(symbol) != std::string::npos) {
+		line.erase(line.find(symbol));
+	}
+	return line;
+}
+
+std::string remove_comments(std::string line)
+{
+	line = remove_end(line, '#');
+	return line;
+}
+
+std::string find_int(std::string line)
+{
+	std::size_t pos = line.find_first_of("1234567890");
+	line.erase(0, pos);
+	if (pos == std::string::npos)
+		return line;
+	line = remove_end(line, ';');
+	return line;
+}
+
+std::string get_value(std::string line)
+{
+	line = remove_end(line, ';');	
+	size_t pos = line.find_first_not_of(" \r\t\b\f");
+	pos = line.find_first_of(" \r\t\b\f", pos);
+	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	line.erase(0, pos);
+	pos = line.find_first_of(" \r\t\b\f");
+	if (pos != std::string::npos)
+		line.erase(pos);
+	return line;
+}
+
+int    to_int(std::string str)
+{
+    int    x;
+    std::istringstream ss(str);
+    ss >> x;
+    return x;
+}
+
+
+
+int			get_method_num(std::string method)
+{
+	if (method == "GET")
+		return 0;
+	else if (method == "POST")
+		return 1;
+	else if (method == "PUT")
+		return 2;
+	else if (method == "HEAD")
+		return 3;
+	else if (method == "OPTIONS")
+		return 4;
+	else if (method == "TRACE")
+		return 5;
+	else if (method == "CONNECT")
+		return 6;
+	else
+		return -1;
+}
+
+

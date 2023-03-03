@@ -10,27 +10,15 @@
 # include "Config.hpp"
 # include "Utils.hpp"
 
-# define LISTEN "listen"
-# define HOST "host"
-# define SERVER_NAME "server_name"
-# define ERROR_PAGE	"error_page"
-# define ALLOW_METHODS "allow_methods"
-# define CLIENT_MAX_BODY "client_max_body_size"									  
-# define ROOT "root"
-# define INDEX "index"
-# define ALIAS "alias"
-# define AUTOINDEX "autoindex"
-# define RETURN "return"
-# define CGI_EXT "cgi_ext"
-# define CGI_PATH "cgi_path"
+
 
 class ConfigParser {
 	private:
-		std::vector<Config> _config;
 		int					_n_servers;
 		int					_error_code;
 
 	public:
+		std::vector<Config> _configs;
 		ConfigParser();
 		ConfigParser(std::string config_file);
 		~ConfigParser();
@@ -58,20 +46,14 @@ class ConfigParser {
 		void clean_location(std::ifstream& config_file, std::string line);
 		void clean_cgi(std::ifstream& config_file, std::string line);
 
-		void clean_methods(std::string line, Location &location);
+		
 		void clean_cgi_path(std::string line, CGI &cgi);
 		void clean_cgi_ext(std::string line, CGI &cgi);
-		bool clean_loc_autoindex(std::string line);
+
 
 
 		// Utils
-		std::string remove_comments(std::string line);
-		std::string remove_end(std::string line, char symbol);
-		std::string find_int(std::string line);
-		std::string get_value(std::string line);
-		int    		to_int(std::string str);
-		bool 		check_def_format(std::string def, std::string line);
-		int			get_method_num(std::string method);
+		
 
 
 

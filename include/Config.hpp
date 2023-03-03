@@ -40,7 +40,7 @@
 			bool								&get_autoindex();
   			std::string							&get_root();
   			std::string							&get_index();
-  			std::map<std::string, Location>		&get_location();
+			std::map<std::string, Location>		&get_location();
 			CGI									&get_cgi();
 			int									get_error_code();
 
@@ -55,8 +55,8 @@
 			void					set_autoindex(bool autoindex);
   			void					set_root(std::string root);
   			void					set_index(std::string index);
-  			void					set_location(std::string key, Location location);
-			void					set_cgi(CGI &cgi);
+  			void					set_location(std::ifstream& config_file, std::string line);
+			void					set_cgi(std::ifstream& config_file, std::string line);
 
 			int						check_config();
 

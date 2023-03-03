@@ -155,9 +155,8 @@ int		ServerManager::check_request_respond()
 			}
 			this->_map_server_fd.erase(it);
 		}
-
-		close(connfd);
-		this->_fds[i].fd = -1;
+		// close(connfd);
+		// this->_fds[i].fd = -1;
 	}
 	return EXIT_SUCCESS;
 }
