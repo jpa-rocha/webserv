@@ -27,11 +27,8 @@ int main(int argc, char** argv)
 	if (argc == 2) {
 		configs = ConfigParser(argv[1]);
 	}
-	else {
-	 	if (configs.get_error_code() != 0)
-	 		return EXIT_FAILURE;
-	}
-
+	if (configs.get_error_code() != 0)
+		return EXIT_FAILURE;
 	ServerManager manager(configs.get_configs());
 
     return EXIT_SUCCESS;

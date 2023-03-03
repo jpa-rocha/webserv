@@ -61,14 +61,15 @@ int ServerManager::run_servers()
 
 int		ServerManager::check_connection()
 {
-        for (size_t i = 0; i < this->_servers.size(); i++)
+		size_t server_num;
+        for (server_num = 0; server_num < this->_servers.size(); server_num++)
         {
-            if (this->_fds[i].revents & POLLIN)
+            if (this->_fds[server_num].revents & POLLIN)
             {
                 int connfd;
                 struct sockaddr_in cli_addr;
                 socklen_t cli_len = sizeof(cli_addr);
-                if ((connfd = accept(this->_servers[i].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
+                if ((connfd = accept(this->_servers[server_num].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
                 {
                     perror("accept");
                     // TODO return error
@@ -78,18 +79,18 @@ int		ServerManager::check_connection()
                std::cout << GREEN << "Received new connection\n" << RESET << std::endl;
 
                 //Add new connection to poll
-				size_t j;
-                for (j = this->_servers.size(); j < MAX_CONN * this->_servers.size(); j++)
+				size_t connection;
+                for (connection = this->_servers.size(); connection < MAX_CONN * this->_servers.size(); connection++)
                 {
-                    if (this->_fds[j].fd == -1)
+                    if (this->_fds[connection].fd == -1)
                     {
-                        this->_fds[j].fd = connfd;
-                        this->_fds[j].events = POLLIN;
+                        this->_fds[connection].fd = connfd;
+                        this->_fds[connection].events = POLLIN;
                         break;
                     }
                 }
 
-                if (j == MAX_CONN * this->_servers.size())
+                if (connection == MAX_CONN * this->_servers.size())
                 {
                     std::cerr << "Too many connections" << std::endl;
                 }
@@ -101,6 +102,7 @@ int		ServerManager::check_connection()
                 {
                     break ;
                 }
+				this->_map_server_fd.insert(std::make_pair(connection, server_num));
             }
         }
 		return EXIT_SUCCESS;
@@ -119,7 +121,11 @@ int		ServerManager::check_request_respond()
 		if (this->_fds[i].revents & (POLLIN | POLLERR))
 		{
 			int n;
-			char buff[this->_servers[0].get_config().get_client_max_body_size()];
+			// 
+				std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+
+			//
+			char buff[this->_servers[it->second].get_config().get_client_max_body_size()];
 			memset(buff, 0, 1024);
 			n = read(connfd, buff, sizeof(buff));            
 			std::cout << "read return: " << n << std::endl;
@@ -142,15 +148,15 @@ int		ServerManager::check_request_respond()
 				httpHeader request(buff);
 				request.printHeader();
 				memset(buff, 0, 1024);
-				this->_servers[0].send_response(connfd, request.getUri());
+				this->_servers[it->second].send_response(connfd, request.getUri());
 			}
 
 			if (--this->_nready <= 0)
 			{
 				break;
 			}
+			this->_map_server_fd.erase(it);
 		}
-
 
 		close(connfd);
 		this->_fds[i].fd = -1;
