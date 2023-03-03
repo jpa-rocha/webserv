@@ -10,10 +10,15 @@
 #include <errno.h>
 #include <stdio.h>
 #include <sstream>
+#include <unistd.h>
+#include <iostream>
+#include <cstdlib>
+#include <csignal>
 #include "../include/Utils.hpp"
 #include "../include/httpHeader.hpp"
 #include "../include/ConfigParser.hpp"
 #include "../include/ServerManager.hpp"
+#include "../include/minilib.hpp"
 
 
 int main(int argc, char** argv)
@@ -43,6 +48,7 @@ int main(int argc, char** argv)
 	/*
 		end
 	*/
+	signal(SIGINT, signal_callback_handler);
 	ServerManager manager(configs.get_configs());
 
     return EXIT_SUCCESS;

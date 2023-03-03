@@ -19,7 +19,7 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 
 ServerManager::~ServerManager()
 {
-	delete this->_fds;
+	delete [] this->_fds;
 }
 
 void ServerManager::pollfd_init()
@@ -28,17 +28,19 @@ void ServerManager::pollfd_init()
     {
         this->_fds[i].fd = this->_servers[i].get_sockfd();
         this->_fds[i].events = POLLIN;
+		this->_fds[i].revents = POLLIN;
     }
 	for (size_t i = this->_servers.size(); i < MAX_CONN * this->_servers.size(); i++)
     {
         this->_fds[i].fd = -1;
-        this->_fds[i].events = -1;
+        this->_fds[i].events = POLLIN;
+		this->_fds[i].revents = POLLIN;
     }
 }
 
 int ServerManager::run_servers()
 {
-	while (true)
+	while (SWITCH)
     {
 		// TODO this->_nready what does it mean? better name?
         this->_nready = poll(this->_fds, this->_nfds, -1);

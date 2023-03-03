@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+int	SWITCH = 1;
+
 std::string readFile(std::string filename)
 {
 	std::ifstream file(filename.c_str());
@@ -118,4 +120,10 @@ int			get_method_num(std::string method)
 		return -1;
 }
 
-
+void signal_callback_handler(int signum) {
+   
+   // Terminate program
+	(void) signum;
+ 	SWITCH = 0;
+   //exit(signum);
+}

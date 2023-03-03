@@ -15,6 +15,7 @@
 #include "minilib.hpp" //our functions
 
 const int MAX_CONN = 5;
+extern int SWITCH;
 
 /*
 
