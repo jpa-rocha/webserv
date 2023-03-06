@@ -7,7 +7,7 @@ import os
 form = cgi.FieldStorage()
 
 
-print(os.environ["QUERY_STRING"], file=sys.stderr)
+#print(os.environ["QUERY_STRING"], file=sys.stderr)
 # print("HTTP/1.1 200 OK")
 print("Content-type: text/html\r\n\r\n")
 print("<html>")

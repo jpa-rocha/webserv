@@ -12,13 +12,6 @@
 # include <cstring>
 # include <fcntl.h>
 
-enum content_type
-{
-	HTML,
-	CSS,
-	CGI
-};
-
 class Server
 {
 	private:

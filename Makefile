@@ -31,8 +31,9 @@ SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)httpHeader.cpp		\
 			$(SRCDIR)Server.cpp			\
 			$(SRCDIR)ServerManager.cpp	\
+			$(SRCDIR)MIME.cpp			\
+			$(SRCDIR)minilib.cpp		\
 			$(SRCDIR)main.cpp			\
-			$(SRCDIR)minilib.cpp	\
 
 ################################################################################
 #################################### PROGRAM ###################################

@@ -101,13 +101,13 @@ void Server::send_response(int client_socket, const std::string& path)
 		send(client_socket, "HTTP/1.1 200 OK\r\n", 19, 0);
 		return ;
 	}
-	else if (path.find("cgi-bin") == std::string::npos)
+	else if (path.find("cgi-bin") != std::string::npos)
 		is_cgi = true;
     else
     	respond_path = path;
 	// int flag = 0; //html = 0; css = 1; py = 2; bash = 3
     
-    respond_path = root + respond_path;
+    respond_path = root + clean_response_path(respond_path);
     std::ifstream file(respond_path.c_str());
     if (!file.is_open())
        send_404(root, response_stream);
@@ -120,18 +120,18 @@ void Server::send_response(int client_socket, const std::string& path)
 			std::cout << BLUE <<  "----HTML----" << RESET << std::endl;
 			file_buffer << file.rdbuf();
 			response_body = file_buffer.str();
-			response_stream << HTTPS_OK << 	"Content-Type: text/html\r\n\r\n" << response_body;
+			response_stream << HTTPS_OK << 	this->get_type(".html") << response_body;
 		}
 		else if (respond_path.compare(respond_path.length() - 4, 4, ".css") == 0) {
 			std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
 			std::string css = readFile("docs/www/utils/style.css");
-			response_stream << HTTPS_OK << 	"Content-Type: text/css\r\n\r\n" << css;
+			response_stream << HTTPS_OK << 	this->get_type(".css") << css;
 		}
 		else if (is_cgi == true) {
 			std::cout << path << std::endl;
 			this->handle_cgi(path);
             //response_body = ;
-            response_stream << HTTPS_OK << 	"Content-Type: text/html\r\n\r\n" << response_body;
+            response_stream << HTTPS_OK << 	this->get_type(".html") << response_body;
 		}
 
     }
@@ -191,25 +191,19 @@ void	Server::exec_script(int pipe_end, std::string path)
 {
     char *args[2];
     (void)pipe_end;
-	//std::vector<std::string> vector;
-
-	// const char **argv = new const char* [vector.size()+2];   // extra room for program name and sentinel
-	// argv [0] = path;         // by convention, argv[0] is program name
-	// for (int j = 0;  j < vector.size()+1;  ++j)     // copy args
-	// 		argv [j+1] = vector[j] .c_str();
-
-	// argv [vector.size()+1] = NULL;  // end of arguments sentinel is NULL
-    args[0] = (char *)malloc(sizeof(char) * 8);
-    for (int i = 0; i < 8; i++)
-        args[0][i] = "python3"[i];
-    args[1] = (char *)malloc(sizeof(char) * path.length());
+	
+	  //std::cerr << this->get_config().get_cgi().get_path().find("python3")->second << std::endl;
+    args[0] = (char *)malloc(sizeof(char) * this->get_config().get_cgi().get_path().find("python3")->second.length() + 1);
+    for (size_t i = 0; i < this->get_config().get_cgi().get_path().find("python3")->second.length(); i++)
+        args[0][i] = this->get_config().get_cgi().get_path().find("python3")->second[i];
+    args[1] = (char *)malloc(sizeof(char) * path.length()  + 1);
     for (size_t i = 0; i < path.length(); i++)
         args[1][i] = path[i];
     args[2] = NULL;
     //dup2(0, pipe_end);
-    std::cout << args[0] << std::endl;
-    std::cout << args[1] << std::endl;
-    std::cout << args[2] << std::endl;
+    std::cerr << args[0] << std::endl;
+    std::cerr << args[1] << std::endl;
+    std::cerr << args[2] << std::endl;
     execve(args[0], args, NULL);
     perror("execve failed.");
     /*
@@ -236,7 +230,7 @@ void	Server::send_404(std::string root, std::ostringstream &response_stream)
 		error404.close();
 	}
 }
-
+/* 
 std::string Server::contentType(std::string content_type)
 {
 	if (flag == HTML || flag == CGI)
@@ -244,3 +238,4 @@ std::string Server::contentType(std::string content_type)
 	if (flag == CSS)
 		return "Content-Type: text/css\r\n\r\n";
 }
+ */

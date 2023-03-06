@@ -10,10 +10,7 @@ std::string readFile(std::string filename)
 {
 	std::ifstream file(filename.c_str());
 	if (!file.is_open())
-	{
-		std::cout << RED << "readFile didn't open" << RESET << std::endl;
 		return (NULL);
-	}
 	std::stringstream file_buffer;
 	file_buffer << file.rdbuf();
 
@@ -132,4 +129,10 @@ void signal_callback_handler(int signum) {
 	(void) signum;
  	SWITCH = 0;
    //exit(signum);
+}
+std::string clean_response_path(std::string response_path)
+{
+	if (response_path[0] == '/')
+		return &response_path[1];
+	return response_path;
 }

@@ -15,5 +15,6 @@ int    		to_int(std::string str);
 bool 		check_def_format(std::string def, std::string line);
 int			get_method_num(std::string method);
 void 		signal_callback_handler(int signum);
+std::string clean_response_path(std::string response_path);
 
 #endif
