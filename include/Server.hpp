@@ -18,7 +18,6 @@ class Server
 		int 				_sockfd;
     	int 				_port;
 		int					_error;
-		int					_curr_conn;
 
 	
 		/* Server();
