@@ -67,10 +67,13 @@ std::string remove_comments(std::string line)
 	return line;
 }
 
+//TODO handle non numeric chars
 std::string find_int(std::string line)
 {
 	std::size_t pos = line.find_first_of("1234567890");
 	line.erase(0, pos);
+	//line = remove_end(line, ' ');
+	std::cout << PURPLE << line << RESET << std::endl;
 	if (pos == std::string::npos)
 		return line;
 	line = remove_end(line, ';');
