@@ -89,10 +89,16 @@ void Server::send_response(int client_socket, const std::string& path)
 	std::string root = this->_config.get_root();
     if (path == "/favicon.ico" || path == "/")
         respond_path = this->_config.get_index();
-    else
+    else {
         respond_path = path;
-    
-    respond_path = root + respond_path;
+	}
+	if (respond_path.find("cgi-bin") == std::string::npos)
+    	respond_path = root + respond_path;
+	else
+    {
+		this->handle_cgi(respond_path);
+    }
+	
     std::ifstream file(respond_path.c_str());
     if (!file.is_open())
     {
@@ -146,4 +152,68 @@ int		Server::clean_fd()
 	if (fd != -1)
 		close(this->get_sockfd());
 	return EXIT_SUCCESS;
+}
+
+int		Server::handle_cgi(std::string& path)
+{
+	std::ifstream file;
+	int fd[2];
+
+    if (pipe(fd) < 0)
+    {
+        std::cout << "Error opening pipe" << std::endl;
+        return EXIT_FAILURE;
+    }
+	
+	path = remove_end(path, '?');
+    path = "." + path;
+	std::cout << path << std::endl;
+	file.open(path.c_str(), std::ios::in);
+	if (file.fail() == true) {
+		// TODO some error checking - what to return?
+		std::cout << "DOES NOT EXIST" << std::endl;
+		return EXIT_FAILURE;
+	}
+    if (!fork())
+        exec_script(fd[0], path);
+    else
+    {
+
+    }
+	std::cout << "DOES EXIST" << std::endl;
+    close(fd[0]);
+	return fd[1];
+}
+
+void	Server::exec_script(int pipe_end, std::string path)
+{
+    char *args[2];
+    (void)pipe_end;
+	//std::vector<std::string> vector;
+
+	// const char **argv = new const char* [vector.size()+2];   // extra room for program name and sentinel
+	// argv [0] = path;         // by convention, argv[0] is program name
+	// for (int j = 0;  j < vector.size()+1;  ++j)     // copy args
+	// 		argv [j+1] = vector[j] .c_str();
+
+	// argv [vector.size()+1] = NULL;  // end of arguments sentinel is NULL
+
+    args[0] = (char *)malloc(sizeof(char) * 8);
+    for (int i = 0; i < 8; i++)
+        args[0][i] = "python3"[i];
+    args[1] = (char *)malloc(sizeof(char) * path.length());
+    for (size_t i = 0; i < path.length(); i++)
+        args[1][i] = path[i];
+    args[2] = NULL;
+   //dup2(0, pipe_end);
+   std::cout << args[0] << std::endl;
+   std::cout << args[1] << std::endl;
+   std::cout << args[2] << std::endl;
+    execve(args[0], args, NULL);
+    perror("execve failed.");
+    /*
+	entrance pipe
+	exit pipe file
+	
+	*/
 }

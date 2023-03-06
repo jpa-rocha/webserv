@@ -4,11 +4,12 @@
 # include "Utils.hpp"
 # include "Config.hpp"
 # include "minilib.hpp"
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <cstring>
-#include <fcntl.h>
+# include <sstream>
+# include <fstream>
+# include <iostream>
+# include <string>
+# include <cstring>
+# include <fcntl.h>
 
 class Server
 {
@@ -42,6 +43,8 @@ class Server
 		
 		void	send_response(int client_socket, const std::string& path);
 		int		clean_fd();
+		int		handle_cgi(std::string& path);
+		void	exec_script(int pipe_end, std::string path);
 };
 
 #endif

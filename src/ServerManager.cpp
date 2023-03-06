@@ -150,6 +150,13 @@ int		ServerManager::check_request_respond()
 				httpHeader request(buff);
 				request.printHeader();
 				memset(buff, 0, 1024);
+				/*
+				
+				
+					TEST CGI
+				
+				
+				*/
 				this->_servers[it->second].send_response(connfd, request.getUri());
 			}
 
