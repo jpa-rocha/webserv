@@ -19,6 +19,8 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 
 ServerManager::~ServerManager()
 {
+	for (size_t i = 0; i < this->get_servers().size(); i++)
+		this->get_server_at(i).clean_fd();
 	delete [] this->_fds;
 }
 
@@ -161,4 +163,14 @@ int		ServerManager::check_request_respond()
 		// this->_fds[i].fd = -1;
 	}
 	return EXIT_SUCCESS;
+}
+
+std::vector<Server>	ServerManager::get_servers()
+{
+	return this->_servers;
+}
+
+Server	ServerManager::get_server_at(int i)
+{
+	return this->_servers[i];
 }

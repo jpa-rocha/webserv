@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <fcntl.h>
 
 class Server
 {
@@ -17,6 +18,7 @@ class Server
 		int 				_sockfd;
     	int 				_port;
 		int					_error;
+		int					_curr_conn;
 
 	
 		/* Server();
@@ -30,12 +32,17 @@ class Server
 		int		bind_socket();
 		int		listen_socket();
 		
+		// getters
+		
 		int     get_sockfd() const;
         int     get_port() const;
 		int	    getError()	const;
 		Config &get_config();
-
-		void send_response(int client_socket, const std::string& path);
+		
+		// utils
+		
+		void	send_response(int client_socket, const std::string& path);
+		int		clean_fd();
 };
 
 #endif

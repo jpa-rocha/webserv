@@ -22,8 +22,7 @@ CGI::CGI(std::ifstream& config_file, std::string line)
 			clean_ext(line);
 	}
 	if (!exit_context || (this->get_path().empty() || this->get_ext().empty() || this->get_root().empty()))
-		set_error_code(12);
-	set_error_code(0);	
+		set_error_code(12);	
 }
 
 void			CGI::clean_ext(std::string line)
@@ -51,11 +50,6 @@ CGI& CGI::operator=(const CGI& obj)
 		this->_path = obj._path;
 		this->_ext = obj._ext;
 	}
-	/* std::cout << "here" << std::endl;
-	std::cout << this->_root << std::endl;
-	std::cout << this->_path.at("python3") << std::endl;
-	std::cout << this->_ext.at(0) << std::endl;
-	std::cout << obj._ext.at(0) << std::endl; */
 	return *this;
 }
 

@@ -137,3 +137,13 @@ void Server::send_response(int client_socket, const std::string& path)
 	close(client_socket);
     client_socket = -1;
 }
+
+int		Server::clean_fd()
+{
+	int    fd;
+
+	fd = fcntl(this->get_sockfd(), F_GETFL);
+	if (fd != -1)
+		close(this->get_sockfd());
+	return EXIT_SUCCESS;
+}
