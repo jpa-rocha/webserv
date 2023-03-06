@@ -79,29 +79,21 @@ Config &Server::get_config()
 	return _config;
 }
 
+std::string	Server::get_type(std::string type)
+{
+	return this->_types.get_type(type);
+}
+
 void Server::send_response(int client_socket, const std::string& path)
 {
     std::string			response_body;
     std::string			respond_path;
 	std::string			response;
 	std::ostringstream	response_stream;
+	bool				is_cgi;
 
 
 	std::string root = this->_config.get_root();
-<<<<<<< HEAD
-    if (path == "/favicon.ico" || path == "/")
-        respond_path = this->_config.get_index();
-    else {
-        respond_path = path;
-	}
-	if (respond_path.find("cgi-bin") == std::string::npos)
-    	respond_path = root + respond_path;
-	else
-    {
-		this->handle_cgi(respond_path);
-    }
-	
-=======
     if (path == "/")
 		respond_path = this->_config.get_index();
 	else if (path == "/favicon.ico")
@@ -109,12 +101,13 @@ void Server::send_response(int client_socket, const std::string& path)
 		send(client_socket, "HTTP/1.1 200 OK\r\n", 19, 0);
 		return ;
 	}
+	else if (path.find("cgi-bin") == std::string::npos)
+		is_cgi = true;
     else
     	respond_path = path;
 	// int flag = 0; //html = 0; css = 1; py = 2; bash = 3
     
     respond_path = root + respond_path;
->>>>>>> origin/request-parsing
     std::ifstream file(respond_path.c_str());
     if (!file.is_open())
        send_404(root, response_stream);
@@ -134,10 +127,12 @@ void Server::send_response(int client_socket, const std::string& path)
 			std::string css = readFile("docs/www/utils/style.css");
 			response_stream << HTTPS_OK << 	"Content-Type: text/css\r\n\r\n" << css;
 		}
-		// else if (isCGI()) {
-		// std::cout << BLUE <<  "----CGI----" << RESET << std::endl;
-		// CGI stuff
-		// }
+		else if (is_cgi == true) {
+			std::cout << path << std::endl;
+			this->handle_cgi(path);
+            //response_body = ;
+            response_stream << HTTPS_OK << 	"Content-Type: text/html\r\n\r\n" << response_body;
+		}
 
     }
 	
@@ -161,29 +156,28 @@ int		Server::clean_fd()
 	return EXIT_SUCCESS;
 }
 
-<<<<<<< HEAD
-int		Server::handle_cgi(std::string& path)
+int		Server::handle_cgi(const std::string& path)
 {
 	std::ifstream file;
 	int fd[2];
-
+	std::string new_path = path;
     if (pipe(fd) < 0)
     {
         std::cout << "Error opening pipe" << std::endl;
         return EXIT_FAILURE;
     }
 	
-	path = remove_end(path, '?');
-    path = "." + path;
-	std::cout << path << std::endl;
-	file.open(path.c_str(), std::ios::in);
+	new_path = remove_end(path, '?');
+    new_path = "/workspaces/webserv" + new_path;
+	std::cout << new_path << std::endl;
+	file.open(new_path.c_str(), std::ios::in);
 	if (file.fail() == true) {
 		// TODO some error checking - what to return?
 		std::cout << "DOES NOT EXIST" << std::endl;
 		return EXIT_FAILURE;
 	}
     if (!fork())
-        exec_script(fd[0], path);
+        exec_script(fd[0], new_path);
     else
     {
 
@@ -205,7 +199,6 @@ void	Server::exec_script(int pipe_end, std::string path)
 	// 		argv [j+1] = vector[j] .c_str();
 
 	// argv [vector.size()+1] = NULL;  // end of arguments sentinel is NULL
-
     args[0] = (char *)malloc(sizeof(char) * 8);
     for (int i = 0; i < 8; i++)
         args[0][i] = "python3"[i];
@@ -213,10 +206,10 @@ void	Server::exec_script(int pipe_end, std::string path)
     for (size_t i = 0; i < path.length(); i++)
         args[1][i] = path[i];
     args[2] = NULL;
-   //dup2(0, pipe_end);
-   std::cout << args[0] << std::endl;
-   std::cout << args[1] << std::endl;
-   std::cout << args[2] << std::endl;
+    //dup2(0, pipe_end);
+    std::cout << args[0] << std::endl;
+    std::cout << args[1] << std::endl;
+    std::cout << args[2] << std::endl;
     execve(args[0], args, NULL);
     perror("execve failed.");
     /*
@@ -225,7 +218,6 @@ void	Server::exec_script(int pipe_end, std::string path)
 	
 	*/
 }
-=======
 void	Server::send_404(std::string root, std::ostringstream &response_stream)
 {
 	std::string response_body;
@@ -244,4 +236,11 @@ void	Server::send_404(std::string root, std::ostringstream &response_stream)
 		error404.close();
 	}
 }
->>>>>>> origin/request-parsing
+
+std::string Server::contentType(std::string content_type)
+{
+	if (flag == HTML || flag == CGI)
+		return "Content-Type: text/html\r\n\r\n";
+	if (flag == CSS)
+		return "Content-Type: text/css\r\n\r\n";
+}
