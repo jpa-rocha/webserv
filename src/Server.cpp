@@ -86,53 +86,51 @@ void Server::send_response(int client_socket, const std::string& path)
 	std::string			response;
 	std::ostringstream	response_stream;
 
+
 	std::string root = this->_config.get_root();
-    if (path == "/favicon.ico" || path == "/")
-        respond_path = this->_config.get_index();
+    if (path == "/")
+		respond_path = this->_config.get_index();
+	else if (path == "/favicon.ico")
+	{
+		send(client_socket, "HTTP/1.1 200 OK\r\n", 19, 0);
+		return ;
+	}
     else
-        respond_path = path;
+    	respond_path = path;
+	// int flag = 0; //html = 0; css = 1; py = 2; bash = 3
     
     respond_path = root + respond_path;
     std::ifstream file(respond_path.c_str());
     if (!file.is_open())
-    {
-        // if the file cannot be opened, send a 404 error
-        std::ifstream error404((root + this->_config.get_error_path(404)).c_str());
-        if (!error404.is_open())
-            std::cerr << RED << _404_ERROR << RESET << std::endl;
-        else
-        {
-            std::stringstream	file_buffer;
-            file_buffer << error404.rdbuf();
-            response_body = file_buffer.str();
-            response_stream << "HTTP/1.1 404 Not Found\r\n\r\n";
-            error404.close();
-        }
-    }
+       send_404(root, response_stream);
     else
     {
         std::stringstream	file_buffer;
-        file_buffer << file.rdbuf();
-        response_body = file_buffer.str();
-		// Generate the HTTP response headers
-    	response_stream << "HTTP/1.1 200 OK\r\n";
-		response_stream << 	"Content-Type: text/html\r\n\r\n";
-        // Add the content to the response body
+        
+		if (respond_path.compare(respond_path.length() - 5, 5, ".html") == 0) {
+
+			std::cout << BLUE <<  "----HTML----" << RESET << std::endl;
+			file_buffer << file.rdbuf();
+			response_body = file_buffer.str();
+			response_stream << HTTPS_OK << 	"Content-Type: text/html\r\n\r\n" << response_body;
+		}
+		else if (respond_path.compare(respond_path.length() - 4, 4, ".css") == 0) {
+			std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
+			std::string css = readFile("docs/www/utils/style.css");
+			response_stream << HTTPS_OK << 	"Content-Type: text/css\r\n\r\n" << css;
+		}
+		// else if (isCGI()) {
+		// std::cout << BLUE <<  "----CGI----" << RESET << std::endl;
+		// CGI stuff
+		// }
+
     }
-	
-    response_stream << response_body;
-    response_stream << "<style>";
-	std::string css = readFile("docs/www/utils/style.css");
-	response_stream << css;
-	response_stream << "</style>";
 	
 	// Send the response to the client
 	response = response_stream.str();
-    //std::cerr << RED << response_body << RESET <<std::endl;
     if ( send(client_socket, response.c_str(), response.length(), 0) < 0  )
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
-    // Close the file
     file.close();
 	close(client_socket);
     client_socket = -1;
@@ -146,4 +144,23 @@ int		Server::clean_fd()
 	if (fd != -1)
 		close(this->get_sockfd());
 	return EXIT_SUCCESS;
+}
+
+void	Server::send_404(std::string root, std::ostringstream &response_stream)
+{
+	std::string response_body;
+
+	 // if the file cannot be opened, send a 404 error
+    std::ifstream error404((root + this->_config.get_error_path(404)).c_str());
+    if (!error404.is_open())
+        std::cerr << RED << _404_ERROR << RESET << std::endl;
+	else
+	{
+		std::stringstream	file_buffer;
+		file_buffer << error404.rdbuf();
+		response_body = file_buffer.str();
+		response_stream << "HTTP/1.1 404 Not Found\r\n\r\n";
+		response_stream << response_body;
+		error404.close();
+	}
 }

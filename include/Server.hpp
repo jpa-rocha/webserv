@@ -42,6 +42,7 @@ class Server
 		
 		void	send_response(int client_socket, const std::string& path);
 		int		clean_fd();
+		void	send_404(std::string root, std::ostringstream &response_stream);
 };
 
 #endif
