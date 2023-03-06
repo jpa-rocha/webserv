@@ -126,5 +126,8 @@ extern int SWITCH;
 // error_code 19
 # define LISTEN_ERROR "ERROR: --- Could not listen on socket fd---"
 
+/* HTML response */
+
+#define HTTPS_OK "HTTP/1.1 200 OK\r\n"
 
 #endif

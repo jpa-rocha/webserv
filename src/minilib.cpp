@@ -10,7 +10,10 @@ std::string readFile(std::string filename)
 {
 	std::ifstream file(filename.c_str());
 	if (!file.is_open())
+	{
+		std::cout << RED << "readFile didn't open" << RESET << std::endl;
 		return (NULL);
+	}
 	std::stringstream file_buffer;
 	file_buffer << file.rdbuf();
 

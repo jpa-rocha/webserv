@@ -45,6 +45,7 @@ class Server
 		int		clean_fd();
 		int		handle_cgi(std::string& path);
 		void	exec_script(int pipe_end, std::string path);
+		void	send_404(std::string root, std::ostringstream &response_stream);
 };
 
 #endif
