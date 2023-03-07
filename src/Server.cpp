@@ -22,7 +22,7 @@ int	Server::init_socket()
 		return 16;
     }
 	int optval = 1;
-	if (setsockopt(this->_sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0)
+	if (setsockopt(this->_sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, sizeof(optval)) < 0)
     {
         std::cerr << RED << SOCK_OPT_ERROR << RESET << std::endl;
 		this->_error = 17;
@@ -99,6 +99,8 @@ void Server::send_response(int client_socket, const std::string& path)
 	else if (path == "/favicon.ico")
 	{
 		send(client_socket, "HTTP/1.1 200 OK\r\n", 19, 0);
+	    close(client_socket);
+        client_socket = -1;
 		return ;
 	}
 	else if (path.find("cgi-bin") != std::string::npos)
