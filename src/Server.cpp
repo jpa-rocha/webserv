@@ -86,7 +86,7 @@ std::string	Server::get_type(std::string type)
 
 void Server::send_response(int client_socket, const std::string& path)
 {
-    std::string			response_body;
+    std::string			response_body = "";
     std::string			respond_path;
 	std::string			response;
 	std::ostringstream	response_stream;
@@ -166,7 +166,7 @@ int		Server::handle_cgi(const std::string& path, std::string& response_body)
 	std::string new_path = path;
 	std::string shebang;
 	char buff[1000];
-
+	memset(buff, 0, 1000); // TODO we need to initialize buff (otherwise gives cond.jump etc. error)
     if (pipe(fd) < 0)
     {
         std::cout << "Error opening pipe" << std::endl;
