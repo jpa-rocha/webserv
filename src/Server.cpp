@@ -2,6 +2,7 @@
 
 Server::Server(Config config): _config(config), _error(0)
 {
+	bzero(&_serv_addr, sizeof(sockaddr_in));
 	this->_port = this->_config.get_port();
 	if (this->init_socket() != 0)
 		return;
@@ -95,13 +96,6 @@ void Server::send_response(int client_socket, const std::string& path)
 	std::string root = this->_config.get_root();
     if (path == "/")
 		respond_path = this->_config.get_index();
-	else if (path == "/favicon.ico")
-	{
-		send(client_socket, "HTTP/1.1 200 OK\r\n", 19, 0);
-	    close(client_socket);
-        client_socket = -1;
-		return ;
-	}
 	else if (path.find("cgi-bin") != std::string::npos)
 		is_cgi = true;
     else
@@ -123,6 +117,13 @@ void Server::send_response(int client_socket, const std::string& path)
 			response_body = file_buffer.str();
 			response_stream << HTTPS_OK << 	this->get_type(".html") << response_body;
 		}
+		else if (respond_path.compare(respond_path.length() - 4, 4, ".ico") == 0)
+		{
+			std::cout << BLUE <<  "----ICO----" << RESET << std::endl;
+			file_buffer << file.rdbuf();
+			response_body = file_buffer.str();
+			response_stream << HTTPS_OK << 	this->get_type(".ico") << response_body;
+		}
 		else if (respond_path.compare(respond_path.length() - 4, 4, ".css") == 0) {
 			std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
 			std::string css = readFile("docs/www/utils/style.css");
@@ -134,7 +135,6 @@ void Server::send_response(int client_socket, const std::string& path)
             //response_body = ;
             response_stream << HTTPS_OK << 	this->get_type(".html") << response_body;
 		}
-
     }
 	
 	// Send the response to the client
@@ -143,8 +143,8 @@ void Server::send_response(int client_socket, const std::string& path)
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
     file.close();
-	close(client_socket);
-    client_socket = -1;
+	// close(client_socket);
+    // client_socket = -1;
 }
 
 int		Server::clean_fd()
