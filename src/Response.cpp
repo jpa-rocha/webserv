@@ -114,7 +114,7 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body)
 	// TODO invalid file, no shebang
 	if (shebang.find("#!") == std::string::npos)
 		return EXIT_FAILURE;
-	int pos = shebang.find_last_of("/");
+	size_t pos = shebang.find_last_of("/");
 	shebang = &shebang[pos] + 1;
 	file.close();
     if (fork() == 0)
@@ -125,6 +125,31 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body)
 		close(fd[1]);
 		while (read(fd[0], buff, sizeof(buff) - 1)) {
 			response_body += buff;
+		}
+		std::cout << response_body << std::endl;
+		pos = response_body.find('\n');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "<br>");
+			pos = response_body.find('\n', pos);
+		}
+		pos = response_body.find('\n');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "<br>");
+			pos = response_body.find('\n', pos);
+		}
+		pos = response_body.find(' ');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "&nbsp;&nbsp;");
+			pos = response_body.find(' ', pos);
+		}
+		pos = response_body.find('\t');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "&emsp;&emsp;&emsp;&emsp;");
+			pos = response_body.find('\t', pos);
 		}
 		response_body.push_back('\0');
 		close(fd[0]);
@@ -148,7 +173,7 @@ void	Response::exec_script(int *pipe, std::string path, std::string program)
 	}
 	args[1][j] = '\0';
     args[2] = NULL;
-    dup2(pipe[0], STDIN_FILENO);
+    //dup2(pipe[0], STDIN_FILENO);
 	dup2(pipe[1], STDOUT_FILENO);
 	close(pipe[1]);
     execve(args[0], args, NULL);

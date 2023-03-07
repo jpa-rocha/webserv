@@ -1,3 +1,3 @@
 #!/bin/bash
 
-fortune | cowsay
+/usr/games/fortune | /usr/games/cowsay
