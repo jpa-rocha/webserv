@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 		end
 	*/
 	signal(SIGINT, signal_callback_handler);
-	signal(SIGQUIT, signal_callback_handler);
+	//signal(SIGQUIT, signal_callback_handler);
 	ServerManager manager(configs.get_configs());
 
     return EXIT_SUCCESS;
