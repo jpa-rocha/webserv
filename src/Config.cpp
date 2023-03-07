@@ -28,6 +28,9 @@ Config &Config::operator=(const Config& obj)
 		this->_autoindex = obj._autoindex;
 		this->_root = obj._root;
 		this->_index = obj._index;
+		this->_error_code = obj._error_code;
+		this->_cgi = obj._cgi;
+		this->_location = obj._location;
 	}
 	return *this;
 }
@@ -149,15 +152,17 @@ void					Config::set_index(std::string index)
 	this->_index = index;
 }
 
-void					Config::set_location(std::string key, Location location)
+void					Config::set_location(std::ifstream& config_file, std::string line)
 {
-	std::pair<std::string, Location> p = std::make_pair(key, location);
-	this->_location.insert(p);
+	std::string key = get_value(line);
+	Location location = Location(config_file, line);
+	this->set_error_code(location.get_error_code());
+	this->_location.insert(std::make_pair(key, location));
 }
 
-void					Config::set_cgi(CGI &cgi)
+void					Config::set_cgi(std::ifstream& config_file, std::string line)
 {
-	this->_cgi = cgi;
+	this->_cgi = CGI(config_file, line);
 }
 
 //TODO is config valid check

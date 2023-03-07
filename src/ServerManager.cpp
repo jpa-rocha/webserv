@@ -19,7 +19,9 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 
 ServerManager::~ServerManager()
 {
-	delete this->_fds;
+	for (size_t i = 0; i < this->get_servers().size(); i++)
+		this->get_server_at(i).clean_fd();
+	delete [] this->_fds;
 }
 
 void ServerManager::pollfd_init()
@@ -28,17 +30,19 @@ void ServerManager::pollfd_init()
     {
         this->_fds[i].fd = this->_servers[i].get_sockfd();
         this->_fds[i].events = POLLIN;
+		this->_fds[i].revents = POLLIN;
     }
 	for (size_t i = this->_servers.size(); i < MAX_CONN * this->_servers.size(); i++)
     {
         this->_fds[i].fd = -1;
-        this->_fds[i].events = -1;
+        this->_fds[i].events = POLLIN;
+		this->_fds[i].revents = POLLIN;
     }
 }
 
 int ServerManager::run_servers()
 {
-	while (true)
+	while (SWITCH)
     {
 		// TODO this->_nready what does it mean? better name?
         this->_nready = poll(this->_fds, this->_nfds, -1);
@@ -146,6 +150,13 @@ int		ServerManager::check_request_respond()
 				httpHeader request(buff);
 				request.printHeader();
 				memset(buff, 0, 1024);
+				/*
+				
+				
+					TEST CGI
+				
+				
+				*/
 				this->_servers[it->second].send_response(connfd, request.getUri());
 			}
 
@@ -155,9 +166,18 @@ int		ServerManager::check_request_respond()
 			}
 			this->_map_server_fd.erase(it);
 		}
-
-		close(connfd);
-		this->_fds[i].fd = -1;
+		// close(connfd);
+		// this->_fds[i].fd = -1;
 	}
 	return EXIT_SUCCESS;
+}
+
+std::vector<Server>	ServerManager::get_servers()
+{
+	return this->_servers;
+}
+
+Server	ServerManager::get_server_at(int i)
+{
+	return this->_servers[i];
 }

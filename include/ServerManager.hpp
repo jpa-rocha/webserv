@@ -27,6 +27,8 @@ class ServerManager {
 		int		check_connection();
 		int		check_request_respond();
 
+		std::vector<Server>	get_servers();
+		Server				get_server_at(int i);
 };
 
 #endif
