@@ -79,13 +79,14 @@ int ServerManager::run_servers()
 					int		received;
 
 					// recv shows an error while tring to acces favicon
+					std::cout << this->_fds[i].fd << std::endl;
 					received = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
 					if (received < 0)
 					{
 						if (errno != EWOULDBLOCK) //TODO cannot use errno
 						{
-							perror("recv");
 							close_connection = true;
+							perror("recv");
 						}
 						break ;
 					}
@@ -118,7 +119,11 @@ int ServerManager::run_servers()
 				if (this->_fds[i].fd == -1)
 				{
 					for (size_t j = i; j < this->_nfds; j++)
+					{
 						this->_fds[j].fd = this->_fds[j + 1].fd;
+						this->_fds[j].events = this->_fds[j + 1].events;
+						this->_fds[j].revents = this->_fds[j + 1].revents;
+					}
 					i--;
 					this->_nfds--;
 				}
@@ -128,7 +133,10 @@ int ServerManager::run_servers()
 	for (size_t i = 0; i < this->_nfds; i++)
 	{
 		if (this->_fds[i].fd >= 0)
+		{
 			close(this->_fds[i].fd);
+			this->_fds[i].fd = -1;
+		}
 	}
 	return EXIT_SUCCESS;
 }
