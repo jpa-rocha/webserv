@@ -41,16 +41,16 @@ class Server
 		int     	get_sockfd() const;
         int     	get_port() const;
 		int	    	getError()	const;
-		std::string	get_type(std::string type);
+		
 		Config 		&get_config();
 		
 		// utils
 		
-		void	send_response(int client_socket, const std::string& path);
+		//void	send_response(int client_socket, const std::string& path);
 		int		clean_fd();
-		int		handle_cgi(const std::string& path, std::string& response_body);
-		void	exec_script(int *pipe, std::string path, std::string program);
-		void	send_404(std::string root, std::ostringstream &response_stream);
+		//int		handle_cgi(const std::string& path, std::string& response_body);
+		//void	exec_script(int *pipe, std::string path, std::string program);
+		//void	send_404(std::string root, std::ostringstream &response_stream);
 		std::string contentType(int flag);
 };
 

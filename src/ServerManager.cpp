@@ -117,7 +117,11 @@ int ServerManager::run_servers()
 					httpHeader request(buffer);
 					request.printHeader();
 					memset(buffer, 0, this->_servers[it->second].get_config().get_client_max_body_size());
-					this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
+					//this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
+					
+					Response obj(this->_fds[i].fd, this->_servers[it->second].get_sockfd(), \
+						this->_servers[it->second].get_config(), request.getUri());
+
 				}
 				if (close_connection)
 				{

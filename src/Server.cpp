@@ -80,12 +80,17 @@ Config &Server::get_config()
 	return _config;
 }
 
-std::string	Server::get_type(std::string type)
+int		Server::clean_fd()
 {
-	return this->_types.get_type(type);
+	int    fd;
+
+	fd = fcntl(this->get_sockfd(), F_GETFL);
+	if (fd != -1)
+		close(this->get_sockfd());
+	return EXIT_SUCCESS;
 }
 
-void Server::send_response(int client_socket, const std::string& path)
+/* void Server::send_response(int client_socket, const std::string& path)
 {
     std::string			response_body = "";
     std::string			respond_path;
@@ -143,26 +148,14 @@ void Server::send_response(int client_socket, const std::string& path)
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
     file.close();
-	// close(client_socket);
-    // client_socket = -1;
-}
+} */
 
-int		Server::clean_fd()
-{
-	int    fd;
-
-	fd = fcntl(this->get_sockfd(), F_GETFL);
-	if (fd != -1)
-		close(this->get_sockfd());
-	return EXIT_SUCCESS;
-}
-
+/* 
 int		Server::handle_cgi(const std::string& path, std::string& response_body)
 {
 	//(void) response_body;
 	std::ifstream file;
 	int fd[2];
-	/* int std_fd[2]; */
 	std::string new_path = path;
 	std::string shebang;
 	char buff[1000];
@@ -190,8 +183,6 @@ int		Server::handle_cgi(const std::string& path, std::string& response_body)
 	int pos = shebang.find_last_of("/");
 	shebang = &shebang[pos] + 1;
 	file.close();
-	/* std_fd[0] = dup(STDIN_FILENO);
-	std_fd[1] = dup(STDOUT_FILENO); */
     if (fork() == 0)
         exec_script(fd, new_path, shebang);
     else
@@ -206,11 +197,11 @@ int		Server::handle_cgi(const std::string& path, std::string& response_body)
     }
 	return EXIT_SUCCESS;
 }
+ */
 
-void	Server::exec_script(int *pipe, std::string path, std::string program)
+/* void	Server::exec_script(int *pipe, std::string path, std::string program)
 {
     char *args[2];
-    //(void)pipe_end;
 	size_t i = 0;
 	size_t j= 0;
     args[0] = new char [this->get_config().get_cgi().get_path().find(program.c_str())->second.length() + 1];
@@ -230,13 +221,10 @@ void	Server::exec_script(int *pipe, std::string path, std::string program)
 	close(pipe[1]);
     execve(args[0], args, NULL);
     perror("execve failed.");
-    /*
-	entrance pipe
-	exit pipe file
-	
-	*/
-}
-void	Server::send_404(std::string root, std::ostringstream &response_stream)
+
+} */
+
+/* void	Server::send_404(std::string root, std::ostringstream &response_stream)
 {
 	std::string response_body;
 
@@ -254,3 +242,4 @@ void	Server::send_404(std::string root, std::ostringstream &response_stream)
 		error404.close();
 	}
 }
+ */
