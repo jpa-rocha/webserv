@@ -27,8 +27,11 @@ void 	Response::send_response(int client_socket, const std::string& path)
     _respond_path = _config.get_root() + clean_response_path(_respond_path);
     std::ifstream file(_respond_path.c_str());
 /* --------------------------------------------------------------------------- */
+    std::cout << RED << _respond_path << RESET << std::endl;
 	if (!file.is_open())
+	{
        send_404(_config.get_root(), _response_stream);
+	}
     else
     {
         /* 
@@ -41,7 +44,6 @@ void 	Response::send_response(int client_socket, const std::string& path)
 				- close the file
 		*/
 		std::stringstream	file_buffer;
-        
 		if (_respond_path.compare(_respond_path.length() - 5, 5, ".html") == 0) {
 
 			std::cout << BLUE <<  "----HTML----" << RESET << std::endl;
@@ -60,6 +62,12 @@ void 	Response::send_response(int client_socket, const std::string& path)
 			std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
 			std::string css = readFile("docs/www/utils/style.css");
 			_response_stream << HTTPS_OK << _types.get_content_type(".css") << css;
+		}
+		else if (_respond_path.compare(_respond_path.length() - 4, 4, ".png") == 0) {
+			std::cout << BLUE <<  "----PNG----" << RESET << std::endl;
+			file_buffer << file.rdbuf();
+			_response_body = file_buffer.str();
+			_response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
 		}
 		else if (_is_cgi == true) {
 			std::cout << path << std::endl;
