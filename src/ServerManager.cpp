@@ -72,35 +72,51 @@ int ServerManager::run_servers()
 			else
 			{
 				close_connection = false;
+				bool	file_read = false;
 				while (true)
 				{
 					//TODO implement client max body size
-					char	buffer[1024];
+					std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+					char	buffer[this->_servers[it->second].get_config().get_client_max_body_size()];
 					int		received;
 
 					// recv shows an error while tring to acces favicon
 					std::cout << this->_fds[i].fd << std::endl;
-					received = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
-					if (received < 0)
+					if (file_read == false)
 					{
-						if (errno != EWOULDBLOCK) //TODO cannot use errno
+
+						received = recv(this->_fds[i].fd, buffer, sizeof(buffer), MSG_CTRUNC);
+						if (received > this->_servers[it->second].get_config().get_client_max_body_size())
 						{
-							close_connection = true;
-							perror("recv");
+							std::cout << "Client intended to send too large body." << std::endl;
+							break ;
 						}
-						break ;
+						if (received < 0)
+						{
+							if (errno != EWOULDBLOCK) //TODO cannot use errno
+							{
+								close_connection = true;
+								perror("recv");
+							}
+							break ;
+						}
+						if (received == 0)
+						{
+							printf("Connection closed\n");
+							close_connection = true;
+							break ;
+						}
 					}
-					if (received == 0)
+					else
 					{
-						printf("Connection closed\n");
 						close_connection = true;
 						break ;
 					}
 					/* [ SEND_RESPONSE ] */
-					std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+					file_read = true;
 					httpHeader request(buffer);
 					request.printHeader();
-					memset(buffer, 0, 1024);
+					memset(buffer, 0, this->_servers[it->second].get_config().get_client_max_body_size());
 					this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
 				}
 				if (close_connection)

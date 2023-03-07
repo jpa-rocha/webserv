@@ -2,6 +2,7 @@
 
 Server::Server(Config config): _config(config), _error(0)
 {
+	bzero(&_serv_addr, sizeof(sockaddr_in));
 	this->_port = this->_config.get_port();
 	if (this->init_socket() != 0)
 		return;
@@ -143,8 +144,8 @@ void Server::send_response(int client_socket, const std::string& path)
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
     file.close();
-	close(client_socket);
-    client_socket = -1;
+	// close(client_socket);
+    // client_socket = -1;
 }
 
 int		Server::clean_fd()
