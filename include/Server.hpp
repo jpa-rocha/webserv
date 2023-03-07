@@ -49,7 +49,7 @@ class Server
 		void	send_response(int client_socket, const std::string& path);
 		int		clean_fd();
 		int		handle_cgi(const std::string& path, std::string& response_body);
-		void	exec_script(int pipe_end, std::string path, std::string program);
+		void	exec_script(int *pipe, std::string path, std::string program);
 		void	send_404(std::string root, std::ostringstream &response_stream);
 		std::string contentType(int flag);
 };

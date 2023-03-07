@@ -92,7 +92,6 @@ void Server::send_response(int client_socket, const std::string& path)
 	std::ostringstream	response_stream;
 	bool				is_cgi;
 
-
 	std::string root = this->_config.get_root();
     if (path == "/")
 		respond_path = this->_config.get_index();
@@ -140,7 +139,7 @@ void Server::send_response(int client_socket, const std::string& path)
 	
 	// Send the response to the client
 	response = response_stream.str();
-    if ( send(client_socket, response.c_str(), response.length(), 0) < 0  )
+    if (send(client_socket, response.c_str(), response.length(), 0) < 0  )
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
     file.close();
@@ -160,9 +159,10 @@ int		Server::clean_fd()
 
 int		Server::handle_cgi(const std::string& path, std::string& response_body)
 {
-	(void ) response_body;
+	//(void) response_body;
 	std::ifstream file;
 	int fd[2];
+	/* int std_fd[2]; */
 	std::string new_path = path;
 	std::string shebang;
 	char buff[1000];
@@ -174,7 +174,8 @@ int		Server::handle_cgi(const std::string& path, std::string& response_body)
     }
 	
 	new_path = remove_end(path, '?');
-   	new_path = "/workspaces/webserv" + new_path;
+   	new_path = "." + new_path;
+	// TODO check if ext is allowed
 	std::cout << new_path << std::endl;
 	file.open(new_path.c_str(), std::ios::in);
 	if (file.fail() == true) {
@@ -188,38 +189,45 @@ int		Server::handle_cgi(const std::string& path, std::string& response_body)
 		return EXIT_FAILURE;
 	int pos = shebang.find_last_of("/");
 	shebang = &shebang[pos] + 1;
-    if (!fork())
-        exec_script(fd[0], new_path, shebang);
+	file.close();
+	/* std_fd[0] = dup(STDIN_FILENO);
+	std_fd[1] = dup(STDOUT_FILENO); */
+    if (fork() == 0)
+        exec_script(fd, new_path, shebang);
     else
     {
 		waitpid(-1, NULL, 0);
-		close(fd[0]);
-		while (read(fd[1], buff, sizeof(buff))) {
-			response_body += buff;;
+		close(fd[1]);
+		while (read(fd[0], buff, sizeof(buff) - 1)) {
+			response_body += buff;
 		}
-		std::cout << PURPLE << response_body << RESET << std::endl;
+		response_body.push_back('\0');
+		close(fd[0]);
     }
-	close(fd[1]);
-	return fd[1];
+	return EXIT_SUCCESS;
 }
 
-void	Server::exec_script(int pipe_end, std::string path, std::string program)
+void	Server::exec_script(int *pipe, std::string path, std::string program)
 {
     char *args[2];
-    (void)pipe_end;
-	
-	  //std::cerr << this->get_config().get_cgi().get_path().find("python3")->second << std::endl;
-    args[0] = (char *)malloc(sizeof(char) * this->get_config().get_cgi().get_path().find(program.c_str())->second.length() + 1);
-    for (size_t i = 0; i < this->get_config().get_cgi().get_path().find(program.c_str())->second.length(); i++)
+    //(void)pipe_end;
+	size_t i = 0;
+	size_t j= 0;
+    args[0] = new char [this->get_config().get_cgi().get_path().find(program.c_str())->second.length() + 1];
+    for (i = 0; i < this->get_config().get_cgi().get_path().find(program.c_str())->second.length(); i++) {
         args[0][i] = this->get_config().get_cgi().get_path().find(program.c_str())->second[i];
-    args[1] = (char *)malloc(sizeof(char) * path.length()  + 1);
-    for (size_t i = 0; i < path.length(); i++)
-        args[1][i] = path[i];
+	}
+	args[0][i] = '\0';
+    args[1] = new char [path.length() + 1];
+    for (j = 0; j < path.length(); j++) {
+        args[1][j] = path[j];
+	}
+	args[1][j] = '\0';
     args[2] = NULL;
-    //dup2(0, pipe_end);
-    std::cerr << args[0] << std::endl;
-    std::cerr << args[1] << std::endl;
-    std::cerr << args[2] << std::endl;
+    dup2(pipe[0], STDIN_FILENO);
+	dup2(pipe[1], STDOUT_FILENO);
+	//close(pipe[0]);
+	close(pipe[1]);
     execve(args[0], args, NULL);
     perror("execve failed.");
     /*
@@ -246,12 +254,3 @@ void	Server::send_404(std::string root, std::ostringstream &response_stream)
 		error404.close();
 	}
 }
-/* 
-std::string Server::contentType(std::string content_type)
-{
-	if (flag == HTML || flag == CGI)
-		return "Content-Type: text/html\r\n\r\n";
-	if (flag == CSS)
-		return "Content-Type: text/css\r\n\r\n";
-}
- */
