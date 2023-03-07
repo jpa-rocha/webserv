@@ -30,18 +30,14 @@ void ServerManager::pollfd_init()
     {
         this->_fds[i].fd = this->_servers[i].get_sockfd();
         this->_fds[i].events = POLLIN;
-		this->_fds[i].revents = POLLIN;
-    }
-	for (size_t i = this->_servers.size(); i < MAX_CONN * this->_servers.size(); i++)
-    {
-        this->_fds[i].fd = -1;
-        this->_fds[i].events = POLLIN;
-		this->_fds[i].revents = POLLIN;
     }
 }
 
 int ServerManager::run_servers()
 {
+	// This whole thing probably has memory leaks
+	bool	close_connection = false;
+	bool	compress_array = false;
 	while (SWITCH)
     {
 		// TODO this->_nready what does it mean? better name?
@@ -51,126 +47,202 @@ int ServerManager::run_servers()
             perror("poll");
             return 1;
         }
-
-        //Check for new connection
-		this->check_connection();
-        if (!this->_nready)
-            continue ;
-        //Check for data on all connections
-       check_request_respond();
-    }
-	return EXIT_SUCCESS;
-}
-
-int		ServerManager::check_connection()
-{
-		size_t server_num;
-        for (server_num = 0; server_num < this->_servers.size(); server_num++)
-        {
-            if (this->_fds[server_num].revents & POLLIN)
-            {
-                int connfd;
-                struct sockaddr_in cli_addr;
-                socklen_t cli_len = sizeof(cli_addr);
-                if ((connfd = accept(this->_servers[server_num].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
-                {
+		int	current_size = this->_nfds;
+		for (int i = 0; i < current_size; i++)
+		{
+			if (this->_fds[i].revents == 0)
+				continue ;
+			if (this->_fds[i].revents != POLLIN) {
+				std::cout << RED << "[ UNEXPECTED REVENTS VALUE ]" << RESET << std::endl;
+				return (1);
+			}
+			if (this->_fds[i].fd == this->_servers[i].get_sockfd())
+			{
+				int	connection_fd;
+				connection_fd = accept(this->_servers[i].get_sockfd(), NULL, NULL);
+				if (connection_fd < 0)
+				{
                     perror("accept");
             		return 1;
                 }
-
-               std::cout << GREEN << "Received new connection\n" << RESET << std::endl;
-
-                //Add new connection to poll
-				size_t connection;
-                for (connection = this->_servers.size(); connection < MAX_CONN * this->_servers.size(); connection++)
-                {
-                    if (this->_fds[connection].fd == -1)
-                    {
-                        this->_fds[connection].fd = connfd;
-                        this->_fds[connection].events = POLLIN;
-                        break;
-                    }
-                }
-
-                if (connection == MAX_CONN * this->_servers.size())
-                {
-                    std::cerr << "Too many connections" << std::endl;
-                }
-                else
-                {
-                    this->_nfds++;
-                }
-                if (--this->_nready <= 0)
-                {
-                    break ;
-                }
-				this->_map_server_fd.insert(std::make_pair(connection, server_num));
-            }
-        }
-		return EXIT_SUCCESS;
-}
-
-int		ServerManager::check_request_respond()
-{
-	for (size_t i = this->_servers.size(); i < this->_nfds; i++)
-	{
-		int connfd = this->_fds[i].fd;
-		if (connfd == -1)
-		{
-			continue;
-		}
-
-		if (this->_fds[i].revents & (POLLIN | POLLERR))
-		{
-			int n;
-			// 
-				std::map<int, int>::iterator it = this->_map_server_fd.find(i);
-
-			//
-			char buff[this->_servers[it->second].get_config().get_client_max_body_size()];
-			memset(buff, 0, 1024);
-			n = read(connfd, buff, sizeof(buff));            
-			std::cout << "read return: " << n << std::endl;
-			if ( n < 0 )
-			{
-				if (errno != ECONNRESET) //TODO cannot use errno
-				{
-					std::cerr << "this is n - " << n << std::endl;
-					perror("error while reading the fd");
-				}
-			}
-			else if (n == 0)
-			{
-				printf("Connection closed\n");
-				close(connfd);
-				this->_fds[i].fd = -1;
+				this->_fds[this->_nfds].fd = connection_fd;
+				this->_fds[this->_nfds].events = POLLIN;
+				this->_nfds++;
 			}
 			else
 			{
-				httpHeader request(buff);
-				request.printHeader();
-				memset(buff, 0, 1024);
-				/*
-				
-				
-					TEST CGI
-				
-				
-				*/
-				this->_servers[it->second].send_response(connfd, request.getUri());
-			}
+				close_connection = false;
+				while (true)
+				{
+					//TODO implement client max body size
+					char	buffer[1024];
+					int		received;
 
-			if (--this->_nready <= 0)
-			{
-				break;
+					// recv shows an error while tring to acces favicon
+					received = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
+					if (received < 0)
+					{
+						if (errno != EWOULDBLOCK) //TODO cannot use errno
+						{
+							perror("recv");
+							close_connection = true;
+						}
+						break ;
+					}
+					if (received == 0)
+					{
+						printf("Connection closed\n");
+						close_connection = true;
+						break ;
+					}
+					/* [ SEND_RESPONSE ] */
+					std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+					httpHeader request(buffer);
+					request.printHeader();
+					memset(buffer, 0, 1024);
+					this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
+				}
+				if (close_connection)
+				{
+					close(this->_fds[i].fd);
+					this->_fds[i].fd = -1;
+					compress_array = true;
+				}
 			}
-			this->_map_server_fd.erase(it);
 		}
-		// close(connfd);
-		// this->_fds[i].fd = -1;
+		if (compress_array)
+		{
+			compress_array = false;
+			for (size_t i = 0; i < this->_nfds; i++)
+			{
+				if (this->_fds[i].fd == -1)
+				{
+					for (size_t j = i; j < this->_nfds; j++)
+						this->_fds[j].fd = this->_fds[j + 1].fd;
+					i--;
+					this->_nfds--;
+				}
+			}
+		}
+    }
+	for (size_t i = 0; i < this->_nfds; i++)
+	{
+		if (this->_fds[i].fd >= 0)
+			close(this->_fds[i].fd);
 	}
 	return EXIT_SUCCESS;
 }
+
+// int		ServerManager::check_request_respond()
+// {
+// 	for (size_t i = this->_servers.size(); i < this->_nfds; i++)
+// 	{
+// 		int connfd = this->_fds[i].fd;
+// 		if (connfd == -1)
+// 		{
+// 			continue;
+// 		}
+
+// 		if (this->_fds[i].revents & (POLLIN | POLLERR))
+// 		{
+// 			int n;
+// 			// 
+// 				std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+
+// 			//
+// 			char buff[this->_servers[it->second].get_config().get_client_max_body_size()];
+// 			memset(buff, 0, 1024);
+// 			n = read(connfd, buff, sizeof(buff));            
+// 			std::cout << "read return: " << n << std::endl;
+// 			if ( n < 0 )
+// 			{
+// 				if (errno != ECONNRESET) //TODO cannot use errno
+// 				{
+// 					std::cerr << "this is n - " << n << std::endl;
+// 					perror("error while reading the fd");
+// 				}
+// 			}
+// 			else if (n == 0)
+// 			{
+// 				printf("Connection closed\n");
+// 				close(connfd);
+// 				this->_fds[i].fd = -1;
+// 			}
+// 			else
+// 			{
+// 				httpHeader request(buff);
+// 				request.printHeader();
+// 				memset(buff, 0, 1024);
+// 				/*
+				
+				
+// 					TEST CGI
+				
+				
+// 				*/
+// 				this->_servers[it->second].send_response(connfd, request.getUri());
+// 			}
+
+// 			if (--this->_nready <= 0)
+// 			{
+// 				break;
+// 			}
+// 			this->_map_server_fd.erase(it);
+// 		}
+// 		close(connfd);
+// 		this->_fds[i].fd = -1;
+// 	}
+// 	return EXIT_SUCCESS;
+// }
+
+// int		ServerManager::check_connection()
+// {
+// 		size_t server_num;
+//         for (server_num = 0; server_num < this->_servers.size(); server_num++)
+//         {
+//             if (this->_fds[server_num].revents & POLLIN)
+//             {
+//                 int connfd;
+//                 struct sockaddr_in cli_addr;
+//                 socklen_t cli_len = sizeof(cli_addr);
+//                 if ((connfd = accept(this->_servers[server_num].get_sockfd(), (struct sockaddr *)&cli_addr, &cli_len)) < 0)
+//                 {
+//                     perror("accept");
+//             		return 1;
+//                 }
+
+//                std::cout << GREEN << "Received new connection\n" << RESET << std::endl;
+
+//                 //Add new connection to poll
+// 				size_t connection;
+//                 for (connection = this->_servers.size(); connection < MAX_CONN * this->_servers.size(); connection++)
+//                 {
+//                     if (this->_fds[connection].fd == -1)
+//                     {
+//                         this->_fds[connection].fd = connfd;
+//                         this->_fds[connection].events = POLLIN;
+//                         break;
+//                     }
+//                 }
+
+//                 if (connection == MAX_CONN * this->_servers.size())
+//                 {
+//                     std::cerr << "Too many connections" << std::endl;
+//                 }
+//                 else
+//                 {
+//                     this->_nfds++;
+//                 }
+//                 if (--this->_nready <= 0)
+//                 {
+//                     break ;
+//                 }
+// 				this->_map_server_fd.insert(std::make_pair(connection, server_num));
+//             }
+//         }
+// 		return EXIT_SUCCESS;
+// }
+
 
 std::vector<Server>	ServerManager::get_servers()
 {
