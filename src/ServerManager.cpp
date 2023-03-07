@@ -10,7 +10,7 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
             continue ;
        this->_servers.push_back(server);
     }
-
+	
 	this->_fds = new struct pollfd[MAX_CONN * this->_servers.size()];
     this->pollfd_init();
 	this->_nfds = this->_servers.size();

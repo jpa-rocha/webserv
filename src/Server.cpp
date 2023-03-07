@@ -129,7 +129,7 @@ void Server::send_response(int client_socket, const std::string& path)
 		}
 		else if (is_cgi == true) {
 			std::cout << path << std::endl;
-			this->handle_cgi(path);
+			this->handle_cgi(path, response_body);
             //response_body = ;
             response_stream << HTTPS_OK << 	this->get_type(".html") << response_body;
 		}
@@ -156,11 +156,15 @@ int		Server::clean_fd()
 	return EXIT_SUCCESS;
 }
 
-int		Server::handle_cgi(const std::string& path)
+int		Server::handle_cgi(const std::string& path, std::string& response_body)
 {
+	(void ) response_body;
 	std::ifstream file;
 	int fd[2];
 	std::string new_path = path;
+	std::string shebang;
+	char buff[1000];
+
     if (pipe(fd) < 0)
     {
         std::cout << "Error opening pipe" << std::endl;
@@ -168,7 +172,7 @@ int		Server::handle_cgi(const std::string& path)
     }
 	
 	new_path = remove_end(path, '?');
-    new_path = "/workspaces/webserv" + new_path;
+   	new_path = "/workspaces/webserv" + new_path;
 	std::cout << new_path << std::endl;
 	file.open(new_path.c_str(), std::ios::in);
 	if (file.fail() == true) {
@@ -176,26 +180,36 @@ int		Server::handle_cgi(const std::string& path)
 		std::cout << "DOES NOT EXIST" << std::endl;
 		return EXIT_FAILURE;
 	}
+	getline(file, shebang);
+	// TODO invalid file, no shebang
+	if (shebang.find("#!") == std::string::npos)
+		return EXIT_FAILURE;
+	int pos = shebang.find_last_of("/");
+	shebang = &shebang[pos] + 1;
     if (!fork())
-        exec_script(fd[0], new_path);
+        exec_script(fd[0], new_path, shebang);
     else
     {
-
+		waitpid(-1, NULL, 0);
+		close(fd[0]);
+		while (read(fd[1], buff, sizeof(buff))) {
+			response_body += buff;;
+		}
+		std::cout << PURPLE << response_body << RESET << std::endl;
     }
-	std::cout << "DOES EXIST" << std::endl;
-    close(fd[0]);
+	close(fd[1]);
 	return fd[1];
 }
 
-void	Server::exec_script(int pipe_end, std::string path)
+void	Server::exec_script(int pipe_end, std::string path, std::string program)
 {
     char *args[2];
     (void)pipe_end;
 	
 	  //std::cerr << this->get_config().get_cgi().get_path().find("python3")->second << std::endl;
-    args[0] = (char *)malloc(sizeof(char) * this->get_config().get_cgi().get_path().find("python3")->second.length() + 1);
-    for (size_t i = 0; i < this->get_config().get_cgi().get_path().find("python3")->second.length(); i++)
-        args[0][i] = this->get_config().get_cgi().get_path().find("python3")->second[i];
+    args[0] = (char *)malloc(sizeof(char) * this->get_config().get_cgi().get_path().find(program.c_str())->second.length() + 1);
+    for (size_t i = 0; i < this->get_config().get_cgi().get_path().find(program.c_str())->second.length(); i++)
+        args[0][i] = this->get_config().get_cgi().get_path().find(program.c_str())->second[i];
     args[1] = (char *)malloc(sizeof(char) * path.length()  + 1);
     for (size_t i = 0; i < path.length(); i++)
         args[1][i] = path[i];
