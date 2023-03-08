@@ -165,40 +165,27 @@ void					Config::set_cgi(std::ifstream& config_file, std::string line)
 	this->_cgi = configCGI(config_file, line);
 }
 
-//TODO is config valid check
 //TODO create test cases
-int						Config::check_config()
+void						Config::check_config()
 {
 	// root check
-	if (this->get_root().size() == 0) {
+	if (this->get_root().size() == 0 || dir_exists(this->get_root()) == false) {
 		this->set_error_code(20);
-		// TODO throw error
-		return 20;
+		throw std::logic_error(INVALID_ROOT);
 	}
-	if (dir_exists(this->get_root()) == false) {
-		this->set_error_code(21);
-		return 21;
-	}
-
+	
 	// index check
-	if (this->get_index().size() == 0) {
-		this->set_error_code(22);
-		// TODO throw error
-		return 22;
+	if (this->get_index().size() == 0 || file_exists(this->get_root() + this->get_index()) == false) {
+		this->set_error_code(21);
+		throw std::logic_error(INVALID_INDEX);
 	}
-	if (file_exists(this->get_root() + this->get_index()) == false) {
-		this->set_error_code(23);
-		// TODO throw error
-		return 23;
-	}
-
+	
 	// default error check
 	std::map<int, std::string> error = this->get_default_error();
 	for (std::map<int, std::string>::iterator it = error.begin(); it != error.end(); it++) {
 		if (file_exists(this->get_root() + it->second) == false) {
-			this->set_error_code(24);
-			// TODO throw error
-			return 24;
+			this->set_error_code(22);
+			throw std::logic_error(INVALID_ERROR_CHECK);
 		}
 	}
 
@@ -208,15 +195,24 @@ int						Config::check_config()
 		int error_code = it->second.check_location();
 		if (error_code != EXIT_SUCCESS) {
 			this->set_error_code(error_code);
-			return error_code;
+			switch (this->get_error_code()) {
+				case 23:
+					throw std::logic_error(INVALID_LOCATION_ROOT);
+				case 24:
+					throw std::logic_error(INVALID_LOCATION_INDEX);
+				case 25:
+					throw std::logic_error(INVALID_LOCATION_REDIRECTION);
+				case 26:
+					throw std::logic_error(INVALID_METHODS);
+			}
 		}
 	}
 	
 	// CGI check
 	this->set_error_code(this->get_cgi().cgi_check());
-
-	
-	return this->get_error_code();
+	if (this->get_error_code() != 0) {
+		throw std::logic_error(INVALID_CGI_ROOT);
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, Config& config)

@@ -68,15 +68,41 @@ std::string remove_comments(std::string line)
 }
 
 //TODO handle non numeric chars
-std::string find_int(std::string line)
+std::string find_int(std::string line, int loc)
 {
-	std::size_t pos = line.find_first_of("1234567890");
-	line.erase(0, pos);
-	//line = remove_end(line, ' ');
-	std::cout << PURPLE << line << RESET << std::endl;
-	if (pos == std::string::npos)
+	line = get_word(line, loc);
+	if (line.empty())
 		return line;
+	for (size_t i = 0; i < line.length(); i++)
+	{
+		if (!isdigit(line[i]))
+		{
+			line.clear();
+			return line;
+		}
+	}
+	return line;
+}
+
+std::string	get_word(std::string line, int loc)
+{
+	size_t	pos;
 	line = remove_end(line, ';');
+	for (int i = 0; i < loc; i++)
+	{	
+		pos = line.find_first_not_of(" \r\t\b\f");
+		pos = line.find_first_of(" \r\t\b\f", pos);
+		pos = line.find_first_not_of(" \r\t\b\f", pos);
+		if (pos == std::string::npos)
+		{
+			line.clear();
+			return line;
+		}
+		line.erase(0, pos);
+	}
+	pos = line.find_first_of(" \r\t\b\f");
+	if (pos != std::string::npos)
+		line.erase(pos);
 	return line;
 }
 

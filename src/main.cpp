@@ -1,24 +1,13 @@
-#include <string>
-#include <cstring>
-#include <sys/types.h>
-#include <sys/socket.h>
-// #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <poll.h>
-#include <errno.h>
-#include <stdio.h>
-#include <sstream>
-#include <unistd.h>
-#include <iostream>
-#include <cstdlib>
-#include <csignal>
+
+
+
+#include <stdio.h> // we will not need it probably
 #include "../include/Utils.hpp"
 #include "../include/httpHeader.hpp"
 #include "../include/ConfigParser.hpp"
 #include "../include/ServerManager.hpp"
 #include "../include/minilib.hpp"
 
-//TODO lable headers
 
 int main(int argc, char** argv)
 {
@@ -40,10 +29,10 @@ int main(int argc, char** argv)
 		test
 	*/
 	
-		if (configs.get_config(0).check_config() != 0) {
+		/* if (configs.get_config(0).check_config() != 0) {
 			std::cout << YELLOW << configs.get_config(0).check_config() << RESET << std::endl;
 			return EXIT_FAILURE;
-		}
+		} */
 
 	/*
 		end
