@@ -13,11 +13,16 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 			catch
 				faulty config
 		*/
-		this->_configs[i].check_config();
-        Server server = Server(this->_configs[i]);
-        if (server.getError() != 0)
-            continue ;
-       this->_servers.push_back(server);
+		try {
+			this->_configs[i].check_config();
+        	Server server = Server(this->_configs[i]);
+       		this->_servers.push_back(server);
+		}
+		catch (std::logic_error &e) {
+			std::cout << e.what() << std::endl;
+		}
+        /* if (server.getError() != 0)
+            continue ; */
     }
 	
 	this->_fds = new struct pollfd[MAX_CONN * this->_servers.size()];
