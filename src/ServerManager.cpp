@@ -13,6 +13,7 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 			catch
 				faulty config
 		*/
+		this->_configs[i].check_config();
         Server server = Server(this->_configs[i]);
         if (server.getError() != 0)
             continue ;
