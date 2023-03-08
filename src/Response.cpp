@@ -170,7 +170,6 @@ void	Response::exec_script(int *pipe, std::string path, std::string program)
 	}
 	args[1][j] = '\0';
     args[2] = NULL;
-    //dup2(pipe[0], STDIN_FILENO);
 	dup2(pipe[1], STDOUT_FILENO);
 	close(pipe[1]);
     execve(args[0], args, NULL);
