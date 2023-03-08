@@ -149,39 +149,47 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 // TODO what if there are multiple listens
 void ConfigParser::clean_listen(std::string line)
 {
-	line = find_int(line);
-	if (line.size() == 0)
+	line = find_int(line, 1);
+	if (line.empty())
 		this->set_error_code(3);
 	this->get_config(this->get_n_servers() - 1).set_port(to_int(line.c_str()));
 }
 
 void ConfigParser::clean_host(std::string line)
 {
-	line = find_int(line);
-	if (line.size() == 0)
-		this->set_error_code(4);
+	line = get_word(line, 1);
+	if (line.empty())
+		return (this->set_error_code(4));
+	for (size_t i = 0; i < line.length(); i++)
+	{
+		if (!isdigit(line[i]) && line[i] != '.')
+			return (this->set_error_code(4));
+	}
 	this->get_config(this->get_n_servers() - 1).set_host(inet_addr(line.c_str()));
 }
 
 void ConfigParser::clean_error_page(std::string line)
 {
-	line = find_int(line);
-	if (line.size() == 0)
+	std::string error;
+	error = find_int(line, 1);
+	if (error.empty())
 		this->set_error_code(5);
 	std::size_t pos;
-	pos = line.find_first_not_of(" \r\t\b\f");
+	std::size_t pos2;
+	pos = line.find(error);
 	pos = line.find_first_of(" \r\t\b\f", pos);
 	pos = line.find_first_not_of(" \r\t\b\f", pos);
+	pos2 = line.find_first_of(" \r\t\b\f", pos);
+	pos2 = line.find_first_not_of(" \r\t\b\f", pos2);
+	if (pos == std::string::npos)
+		return this->set_error_code(5);
 	if (line[pos] == '/')
 		pos += 1;
-	std::string path = &line[pos];
-	if (path.size() == 0) {
-		this->set_error_code(5);
-		return;
-	} 
-	pos = line.find_first_of(" ");
-	line.erase(pos);
-	this->get_config(this->get_n_servers() - 1).set_default_error(to_int(line), path);
+	line.erase(0, pos);
+	if (pos2 != std::string::npos)
+		line.erase(pos2);
+	std::cout << RED << error << " & " << line << std::endl;
+	this->get_config(this->get_n_servers() - 1).set_default_error(to_int(error), line);
 }
 
 void ConfigParser::clean_server_name(std::string line)
@@ -194,7 +202,7 @@ void ConfigParser::clean_server_name(std::string line)
 
 void ConfigParser::clean_client_max_body_size(std::string line)
 {
-	line = find_int(line);
+	line = find_int(line, 1);
 	if (line.size() == 0)
 		this->set_error_code(7);
 	this->get_config(this->get_n_servers() - 1).set_client_max_body_size(to_int(line.c_str()));

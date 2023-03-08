@@ -9,6 +9,7 @@
 #include "Location.hpp"
 #include "configCGI.hpp"
 #include "minilib.hpp"
+#include "Utils.hpp"
 
 	class Config {
 		private:
@@ -21,7 +22,7 @@
   			std::string							_index;
  			std::map<int, std::string>			_default_error;
   			std::map<std::string, Location>		_location;
-			configCGI									_cgi;
+			configCGI							_cgi;
 			int									_error_code;
 
 		public:
@@ -58,7 +59,7 @@
   			void					set_location(std::ifstream& config_file, std::string line);
 			void					set_cgi(std::ifstream& config_file, std::string line);
 
-			int						check_config();
+			void					check_config();
 
 			// Utils
 

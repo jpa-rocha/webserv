@@ -1,13 +1,7 @@
 #include "../include/httpHeader.hpp"
 
-/* httpHeader::httpHeader(): _method(), _uri(), _version(), _header()
-{}  */
-
 httpHeader::httpHeader(std::string header)
 {
-	// TODO place code in set method block
-	
-	int i = 0;
 	size_t start = 0, end = 0;
 	end = header.find(" ");
 	std::string tmp_method = header.substr(start, end - start);
@@ -17,49 +11,7 @@ httpHeader::httpHeader(std::string header)
 	start = end + 1;
 	end = header.find("\r\n", start);
 	this->_version = header.substr(start, end - start);
-
-	std::string methods[9] = {"GET", "POST", "DELETE", "PUT", \
-		"HEAD", "OPTIONS", "TRACE", "CONNECT", "NONE"};
-	for (int j = 0; j < 9; j++)
-	{
-		if (tmp_method == methods[j])
-			break;
-	}
-
-	switch (i)
-	{
-		case 0:
-			this->_method = GET;
-			break;
-		case 1:
-			this->_method = POST;
-			break;
-		case 3:
-			this->_method = DELETE;
-			break;
-		case 4:
-			this->_method = PUT;
-			break;
-		case 5:
-			this->_method = HEAD;
-			break;
-		case 6:
-			this->_method = OPTIONS;
-			break;
-		case 7:
-			this->_method = TRACE;
-			break;
-		case 8:
-			this->_method = CONNECT;
-			break;
-		case 9:
-			this->_method = NONE;
-			break;
-		default:
-			std::cerr << "Error method not compatible!" << std::endl; 
-			break;
-	}
-
+	setMethod(tmp_method);
 	start = end + 1;
 	while ((end = header.find("\r\n", start)) != std::string::npos)
 	{
@@ -72,7 +24,6 @@ httpHeader::httpHeader(std::string header)
 		}
 		start = end + 2;
 	}
-
 }
 
 httpHeader::~httpHeader()
@@ -115,12 +66,51 @@ void httpHeader::setHeader(std::string name, std::string value)
 	_header[ name ] = value;
 }
 
-void httpHeader::setMethod(httpMethods method)
+void httpHeader::setMethod(std::string tmp_method)
 {
-	//TODO
-	//check if method is valid
+	int i = 0;
+	std::string methods[9] = {"GET", "POST", "DELETE", "PUT", \
+		"HEAD", "OPTIONS", "TRACE", "CONNECT", "NONE"};
 	
-	_method = method;
+	for (i = 0; i < 9; i++)
+	{
+		if (tmp_method == methods[i])
+			break;
+	}
+	switch (i)
+	{
+		case 0:
+			this->_method = GET;
+			break;
+		case 1:
+			this->_method = POST;
+			break;
+		case 3:
+			this->_method = DELETE;
+			break;
+		case 4:
+			this->_method = PUT;
+			break;
+		case 5:
+			this->_method = HEAD;
+			break;
+		case 6:
+			this->_method = OPTIONS;
+			break;
+		case 7:
+			this->_method = TRACE;
+			break;
+		case 8:
+			this->_method = CONNECT;
+			break;
+		case 9:
+			this->_method = NONE;
+			break;
+		default:
+			std::cerr << "Error method not compatible!" << std::endl; 
+			break;
+	}
+	//_method = method;
 }
 
 void httpHeader::setVersion(std::string version)

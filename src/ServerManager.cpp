@@ -51,7 +51,7 @@ int ServerManager::run_servers()
         this->_nbr_fd_ready = poll(this->_fds, this->_nfds, -1);
         if (this->_nbr_fd_ready == -1)
         {
-            // TODO possible throw error
+            // TODO avoid killing the server, implement test how to deal with it 
 			perror("poll");
             return 1;
         }
@@ -70,9 +70,9 @@ int ServerManager::run_servers()
 				connection_fd = accept(this->_servers[i].get_sockfd(), NULL, NULL);
 				if (connection_fd < 0)
 				{
-                     // TODO possible throw error
+                     // TODO avoid killing the server, implement test how to deal with it (This fix might work, need to test it out)
 					perror("accept");
-            		return 1;
+					continue ;
                 }
 				this->_fds[this->_nfds].fd = connection_fd;
 				this->_fds[this->_nfds].events = POLLIN;
@@ -102,12 +102,9 @@ int ServerManager::run_servers()
 						}
 						if (received < 0)
 						{
-							if (errno != EWOULDBLOCK) //TODO cannot use errno
-							{
-								close_connection = true;
-								 // TODO possible throw error
-								perror("recv");
-							}
+							// removed the errno if statement, needs to be tested
+							close_connection = true;
+							perror("recv");
 							break ;
 						}
 						if (received == 0)
