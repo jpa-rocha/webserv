@@ -151,7 +151,10 @@ void ConfigParser::clean_listen(std::string line)
 {
 	line = find_int(line, 1);
 	if (line.empty())
-		this->set_error_code(3);
+	{
+		this->get_config(this->get_n_servers() - 1).set_port(0);
+		return (this->set_error_code(3));
+	}
 	this->get_config(this->get_n_servers() - 1).set_port(to_int(line.c_str()));
 }
 

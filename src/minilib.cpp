@@ -67,7 +67,6 @@ std::string remove_comments(std::string line)
 	return line;
 }
 
-//TODO handle non numeric chars
 std::string find_int(std::string line, int loc)
 {
 	line = get_word(line, loc);
