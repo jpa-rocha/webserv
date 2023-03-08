@@ -188,7 +188,7 @@ void ConfigParser::clean_error_page(std::string line)
 	line.erase(0, pos);
 	if (pos2 != std::string::npos)
 		line.erase(pos2);
-	std::cout << RED << error << " & " << line << std::endl;
+	std::cout << RED << error << " & " << line << RESET << std::endl;
 	this->get_config(this->get_n_servers() - 1).set_default_error(to_int(error), line);
 }
 
