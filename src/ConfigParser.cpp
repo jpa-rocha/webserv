@@ -181,6 +181,7 @@ void ConfigParser::clean_error_page(std::string line)
 	} 
 	pos = line.find_first_of(" ");
 	line.erase(pos);
+	line = remove_end(line, ';');
 	this->get_config(this->get_n_servers() - 1).set_default_error(to_int(line), path);
 }
 
