@@ -21,7 +21,7 @@ MIME::MIME()
     this->_mime_types["default"] = "Content-Type: text/html\r\n\r\n";
 }
 
-std::string MIME::get_type(std::string type)
+std::string MIME::get_content_type(std::string type)
 {
 	if (this->_mime_types.count(type))
 		return this->_mime_types[type];

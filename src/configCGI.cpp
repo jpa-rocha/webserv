@@ -1,12 +1,12 @@
-#include "../include/CGI.hpp"
+#include "../include/configCGI.hpp"
 
 
-CGI::CGI()
+configCGI::configCGI()
 {
 	this->_error_code = 0;
 }
 
-CGI::CGI(std::ifstream& config_file, std::string line)
+configCGI::configCGI(std::ifstream& config_file, std::string line)
 {
 	int	exit_context = 0;
 
@@ -25,7 +25,7 @@ CGI::CGI(std::ifstream& config_file, std::string line)
 		set_error_code(12);	
 }
 
-void			CGI::clean_ext(std::string line)
+void			configCGI::clean_ext(std::string line)
 {
 	size_t pos = 0;
 	size_t pos2 = 0;
@@ -43,7 +43,7 @@ void			CGI::clean_ext(std::string line)
 		this->set_error_code(15);
 }
 
-CGI& CGI::operator=(const CGI& obj)
+configCGI& configCGI::operator=(const configCGI& obj)
 {
 	if (this != &obj) {
 		this->_root = obj._root;
@@ -54,47 +54,48 @@ CGI& CGI::operator=(const CGI& obj)
 }
 
 
-std::string									CGI::get_root() const
+std::string									configCGI::get_root() const
 {
 	return this->_root;
 }
 
-std::map<std::string, std::string>			CGI::get_path() const
+std::map<std::string, std::string>			configCGI::get_path() const
 {
 	return this->_path;
 }
 
-std::vector<std::string>					CGI::get_ext() const
+std::vector<std::string>					configCGI::get_ext() const
 {
 	return this->_ext;
 }
 
-int CGI::get_error_code()
+int configCGI::get_error_code()
 {
 	return this->_error_code;
 }
 
-void CGI::set_error_code(int error_code)
+void configCGI::set_error_code(int error_code)
 {
 	this->_error_code = error_code;
 }
 
-void										CGI::set_root(std::string root)
+void										configCGI::set_root(std::string root)
 {
 	this->_root = root;
 }
 
-void										CGI::set_path(std::string program, std::string path)
+void										configCGI::set_path(std::string program, std::string path)
 {
 	this->_path.insert(std::make_pair(program, path));
 }
 
-void										CGI::set_ext(std::string ext)
+void										configCGI::set_ext(std::string ext)
 {
 	this->_ext.push_back(ext);
 }
 
-int											CGI::cgi_check()
+// TODO throw error
+int											configCGI::cgi_check()
 {
 	// root check
 	if (this->get_root().size() == 0) {
@@ -107,7 +108,7 @@ int											CGI::cgi_check()
 	return EXIT_SUCCESS;
 }
 
-void									CGI::clean_path(std::string line)
+void									configCGI::clean_path(std::string line)
 {
 	std::string temp;
 	std::string temp2;
@@ -130,7 +131,7 @@ void									CGI::clean_path(std::string line)
 		this->set_error_code(14);
 }
 //TODO hardcoded
-std::ostream &operator<<(std::ostream &os, const CGI &cgi)
+std::ostream &operator<<(std::ostream &os, const configCGI &cgi)
 {
 	//os << cgi.get_root() << std::endl;
 	// std::map<std::string, std::string>::iterator it;

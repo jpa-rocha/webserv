@@ -7,7 +7,7 @@
 #include <iostream>
 # include <stdlib.h>
 #include "Location.hpp"
-#include "CGI.hpp"
+#include "configCGI.hpp"
 #include "minilib.hpp"
 
 	class Config {
@@ -21,7 +21,7 @@
   			std::string							_index;
  			std::map<int, std::string>			_default_error;
   			std::map<std::string, Location>		_location;
-			CGI									_cgi;
+			configCGI									_cgi;
 			int									_error_code;
 
 		public:
@@ -41,7 +41,7 @@
   			std::string							&get_root();
   			std::string							&get_index();
 			std::map<std::string, Location>		&get_location();
-			CGI									&get_cgi();
+			configCGI									&get_cgi();
 			int									get_error_code();
 
 		

@@ -5,6 +5,8 @@
 
 httpHeader::httpHeader(std::string header)
 {
+	// TODO place code in set method block
+	
 	int i = 0;
 	size_t start = 0, end = 0;
 	end = header.find(" ");
@@ -110,9 +112,6 @@ const std::string &httpHeader::getVersion() const
 
 void httpHeader::setHeader(std::string name, std::string value)
 {
-	//TODO
-	// check for errors - if key values are the same;
-	// white spaces, chars toLower
 	_header[ name ] = value;
 }
 
@@ -127,7 +126,8 @@ void httpHeader::setMethod(httpMethods method)
 void httpHeader::setVersion(std::string version)
 {
 	//TODO - check is version is valid
-	
+	// check for http 1.1
+	// throw error
 	_version = version;
 }
 

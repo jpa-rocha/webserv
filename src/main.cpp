@@ -1,11 +1,9 @@
-#include <iostream>
 #include <string>
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+// #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <poll.h>
 #include <errno.h>
 #include <stdio.h>
@@ -20,6 +18,7 @@
 #include "../include/ServerManager.hpp"
 #include "../include/minilib.hpp"
 
+//TODO lable headers
 
 int main(int argc, char** argv)
 {
@@ -30,12 +29,13 @@ int main(int argc, char** argv)
 	ConfigParser configs;
 
 	if (argc == 2) {
-		// TODO assignment operator
+		// TODO try catch block
 		configs = ConfigParser(argv[1]);
 	}
 	if (configs.get_error_code() != 0)
 		return EXIT_FAILURE;
-
+	
+	//TODO check for error files paths
 	/*
 		test
 	*/

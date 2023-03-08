@@ -8,16 +8,16 @@
 # include <stdlib.h>
 # include "Utils.hpp"
 
-class CGI {
+class configCGI {
 	private:
 		std::string								_root;
 		std::map<std::string, std::string>		_path;
 		std::vector<std::string>				_ext;
 		int										_error_code;
 	public:
-		CGI();
-		CGI(std::ifstream& config_file, std::string line);
-		CGI& operator=(const CGI& obj);
+		configCGI();
+		configCGI(std::ifstream& config_file, std::string line);
+		configCGI& operator=(const configCGI& obj);
 		// Setters
 		void set_root(std::string root);
 		void set_path(std::string program, std::string path);
@@ -35,6 +35,6 @@ class CGI {
 		void									clean_ext(std::string line);
 };
 
-std::ostream &operator<<(std::ostream &os, const CGI &cgi);
+std::ostream &operator<<(std::ostream &os, const configCGI &cgi);
 
 #endif

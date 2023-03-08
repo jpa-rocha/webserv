@@ -8,8 +8,8 @@
 #include <map>
 #include <iterator>
 #include "httpHeader.hpp"
-#include <fstream>
-#include <sys/socket.h>
+#include <fstream> // for (if/of) streams
+#include <sys/socket.h> // for socket()
 #include <unistd.h>
 #include <cstdlib> //for malloc
 #include "minilib.hpp" //our functions
@@ -126,8 +126,12 @@ extern int SWITCH;
 // error_code 19
 # define LISTEN_ERROR "ERROR: --- Could not listen on socket fd---"
 
+
+
+
 /* HTML response */
 
 #define HTTPS_OK "HTTP/1.1 200 OK\r\n"
+#define HTTPS_404 "HTTP/1.1 200 OK\r\n"
 
 #endif

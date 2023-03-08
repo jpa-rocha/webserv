@@ -3,7 +3,7 @@
 
 Config::Config(): _error_code(0)
 {
-	this->set_port(8000);
+	this->set_port(80);
 	this->set_host(inet_addr("127.0.0.1"));
 	this->set_server_name("default");
 	this->set_client_max_body_size(1024);
@@ -93,7 +93,7 @@ std::map<std::string, Location>		&Config::get_location()
 	return this->_location;
 }
 
-CGI									&Config::get_cgi()
+configCGI									&Config::get_cgi()
 {
 	return this->_cgi;
 }
@@ -162,16 +162,17 @@ void					Config::set_location(std::ifstream& config_file, std::string line)
 
 void					Config::set_cgi(std::ifstream& config_file, std::string line)
 {
-	this->_cgi = CGI(config_file, line);
+	this->_cgi = configCGI(config_file, line);
 }
 
 //TODO is config valid check
+//TODO create test cases
 int						Config::check_config()
 {
 	// root check
 	if (this->get_root().size() == 0) {
 		this->set_error_code(20);
-		// TODO print error
+		// TODO throw error
 		return 20;
 	}
 	if (dir_exists(this->get_root()) == false) {
@@ -182,12 +183,12 @@ int						Config::check_config()
 	// index check
 	if (this->get_index().size() == 0) {
 		this->set_error_code(22);
-		// TODO print error
+		// TODO throw error
 		return 22;
 	}
 	if (file_exists(this->get_root() + this->get_index()) == false) {
 		this->set_error_code(23);
-		// TODO print error
+		// TODO throw error
 		return 23;
 	}
 
@@ -196,7 +197,7 @@ int						Config::check_config()
 	for (std::map<int, std::string>::iterator it = error.begin(); it != error.end(); it++) {
 		if (file_exists(this->get_root() + it->second) == false) {
 			this->set_error_code(24);
-			// TODO print error
+			// TODO throw error
 			return 24;
 		}
 	}
@@ -214,7 +215,7 @@ int						Config::check_config()
 	// CGI check
 	this->set_error_code(this->get_cgi().cgi_check());
 
-
+	
 	return this->get_error_code();
 }
 

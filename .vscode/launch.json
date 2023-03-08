@@ -8,9 +8,9 @@
 			"name": "(gdb) Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "/workspaces/webserv/webserv",
+			"program": "/workspaces/webserv_group/webserv",
 			"args": [],
-			"cwd": "/workspaces/webserv/",
+			"cwd": "/workspaces/webserv_group/",
 			"stopAtEntry": false,
 			"environment": [],
 			"externalConsole": false,
@@ -24,6 +24,11 @@
 				{
 					"description":  "Set Disassembly Flavor to Intel",
 					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				},
+				{
+					"description":  "follow child/parent",
+					"text": "-gdb-set follow-fork-mode parent",
 					"ignoreFailures": true
 				}
 			]

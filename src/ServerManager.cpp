@@ -5,6 +5,14 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 
     for (size_t i = 0; i < this->_configs.size(); i++)
     {
+		/*
+			TODO
+			if config[i].get_error_code == 0
+			try
+				push to server
+			catch
+				faulty config
+		*/
         Server server = Server(this->_configs[i]);
         if (server.getError() != 0)
             continue ;
@@ -40,11 +48,11 @@ int ServerManager::run_servers()
 	bool	compress_array = false;
 	while (SWITCH)
     {
-		// TODO this->_nready what does it mean? better name?
-        this->_nready = poll(this->_fds, this->_nfds, -1);
-        if (this->_nready == -1)
+        this->_nbr_fd_ready = poll(this->_fds, this->_nfds, -1);
+        if (this->_nbr_fd_ready == -1)
         {
-            perror("poll");
+            // TODO possible throw error
+			perror("poll");
             return 1;
         }
 		int	current_size = this->_nfds;
@@ -62,7 +70,8 @@ int ServerManager::run_servers()
 				connection_fd = accept(this->_servers[i].get_sockfd(), NULL, NULL);
 				if (connection_fd < 0)
 				{
-                    perror("accept");
+                     // TODO possible throw error
+					perror("accept");
             		return 1;
                 }
 				this->_fds[this->_nfds].fd = connection_fd;
@@ -72,35 +81,57 @@ int ServerManager::run_servers()
 			else
 			{
 				close_connection = false;
+				bool	file_read = false;
 				while (true)
 				{
 					//TODO implement client max body size
-					char	buffer[1024];
+					std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+					char	buffer[this->_servers[it->second].get_config().get_client_max_body_size()];
 					int		received;
 
 					// recv shows an error while tring to acces favicon
-					received = recv(this->_fds[i].fd, buffer, sizeof(buffer), 0);
-					if (received < 0)
+					std::cout << this->_fds[i].fd << std::endl;
+					if (file_read == false)
 					{
-						if (errno != EWOULDBLOCK) //TODO cannot use errno
+
+						received = recv(this->_fds[i].fd, buffer, sizeof(buffer), MSG_CTRUNC);
+						if (received > this->_servers[it->second].get_config().get_client_max_body_size())
 						{
-							perror("recv");
-							close_connection = true;
+							std::cout << "Client intended to send too large body." << std::endl;
+							break ;
 						}
-						break ;
+						if (received < 0)
+						{
+							if (errno != EWOULDBLOCK) //TODO cannot use errno
+							{
+								close_connection = true;
+								 // TODO possible throw error
+								perror("recv");
+							}
+							break ;
+						}
+						if (received == 0)
+						{
+							printf("Connection closed\n");
+							close_connection = true;
+							break ;
+						}
 					}
-					if (received == 0)
+					else
 					{
-						printf("Connection closed\n");
 						close_connection = true;
 						break ;
 					}
 					/* [ SEND_RESPONSE ] */
-					std::map<int, int>::iterator it = this->_map_server_fd.find(i);
+					file_read = true;
 					httpHeader request(buffer);
 					request.printHeader();
-					memset(buffer, 0, 1024);
-					this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
+					memset(buffer, 0, this->_servers[it->second].get_config().get_client_max_body_size());
+					//this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
+					
+					Response obj(this->_fds[i].fd, this->_servers[it->second].get_sockfd(), \
+						this->_servers[it->second].get_config(), request.getUri());
+
 				}
 				if (close_connection)
 				{
@@ -118,7 +149,11 @@ int ServerManager::run_servers()
 				if (this->_fds[i].fd == -1)
 				{
 					for (size_t j = i; j < this->_nfds; j++)
+					{
 						this->_fds[j].fd = this->_fds[j + 1].fd;
+						this->_fds[j].events = this->_fds[j + 1].events;
+						this->_fds[j].revents = this->_fds[j + 1].revents;
+					}
 					i--;
 					this->_nfds--;
 				}
@@ -128,7 +163,10 @@ int ServerManager::run_servers()
 	for (size_t i = 0; i < this->_nfds; i++)
 	{
 		if (this->_fds[i].fd >= 0)
+		{
 			close(this->_fds[i].fd);
+			this->_fds[i].fd = -1;
+		}
 	}
 	return EXIT_SUCCESS;
 }
@@ -183,7 +221,7 @@ int ServerManager::run_servers()
 // 				this->_servers[it->second].send_response(connfd, request.getUri());
 // 			}
 
-// 			if (--this->_nready <= 0)
+// 			if (--this->_nbr_fd_ready <= 0)
 // 			{
 // 				break;
 // 			}
@@ -233,7 +271,7 @@ int ServerManager::run_servers()
 //                 {
 //                     this->_nfds++;
 //                 }
-//                 if (--this->_nready <= 0)
+//                 if (--this->_nbr_fd_ready <= 0)
 //                 {
 //                     break ;
 //                 }
