@@ -21,7 +21,7 @@
   			std::string							_index;
  			std::map<int, std::string>			_default_error;
   			std::map<std::string, Location>		_location;
-			configCGI									_cgi;
+			configCGI							_cgi;
 			int									_error_code;
 
 		public:
@@ -41,7 +41,7 @@
   			std::string							&get_root();
   			std::string							&get_index();
 			std::map<std::string, Location>		&get_location();
-			configCGI									&get_cgi();
+			configCGI							&get_cgi();
 			int									get_error_code();
 
 		
