@@ -36,7 +36,7 @@ class httpHeader
 		const std::map<std::string, std::string>& getHeader(std::string name) const;
 
 		void setHeader(std::string name, std::string value);
-		void setMethod(httpMethods method);
+		void setMethod(std::string tmp_method);
 		void setVersion(std::string version);
 
 		void printHeader();

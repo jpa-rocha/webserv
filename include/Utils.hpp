@@ -2,17 +2,24 @@
 # define UTILS_HPP
 
 
-
-#include <iostream>
+#include <iostream> 
 #include <string>
+#include <cstring>
 #include <map>
 #include <iterator>
-#include "httpHeader.hpp"
-#include <fstream> // for (if/of) streams
+#include <csignal> // for signals
+#include <cstdlib> // for dynamic mem. management
+#include <fstream> // streams for file operations
+#include <sstream> // constructs stringstream obj.s
+#include <sys/types.h>
+#include <poll.h> // definitions for the poll func.
+#include <errno.h>
+#include <arpa/inet.h> // for internet operations & struct in_addr
 #include <sys/socket.h> // for socket()
-#include <unistd.h>
-#include <cstdlib> //for malloc
+#include <unistd.h> // for access(), execve() 
+#include "httpHeader.hpp"
 #include "minilib.hpp" //our functions
+
 
 const int MAX_CONN = 5;
 extern int SWITCH;
@@ -124,9 +131,31 @@ extern int SWITCH;
 # define BIND_ERROR "ERROR: --- Could not bind socket ---"
 
 // error_code 19
-# define LISTEN_ERROR "ERROR: --- Could not listen on socket fd---"
+# define LISTEN_ERROR "ERROR: --- Could not listen on socket fd ---"
 
+// error_code 20
+# define INVALID_ROOT "ERROR: --- Provided  ** root ** does not exist ---"
 
+// error_code 21
+# define INVALID_INDEX "ERROR: --- Provided  ** index ** does not exist ---"
+
+// error_code 22
+# define INVALID_ERROR_CHECK "ERROR: --- One of the provided ** default_error ** pages does not exist ---"
+
+// error_code 23
+# define INVALID_LOCATION_ROOT "ERROR: --- One of the provided locations ** root ** does not exist ---"
+
+// error_code 24
+# define INVALID_LOCATION_INDEX "ERROR: --- One of the provided locations ** index ** does not exist ---"
+
+// error_code 25
+# define INVALID_LOCATION_REDIRECTION "ERROR: --- One of the provided locations ** redirection ** does not exist ---"
+
+// error_code 26
+# define INVALID_METHODS "ERROR: --- One of the provided locations ** methods ** are not valid ---"
+
+// error_code 27
+# define INVALID_CGI_ROOT "ERROR: --- Provided  ** cgi-bin root ** does not exist ---"
 
 
 /* HTML response */

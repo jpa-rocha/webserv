@@ -121,30 +121,19 @@ void										Location::set_alias(std::string	alias)
 	this->_alias = alias;
 }
 
-// TODO throw error
 int								Location::check_location()
 {
 	// root check
-	if (this->get_root().size() == 0) {
-		// TODO throw error
-		return 25;
+	if (this->get_root().size() == 0 || dir_exists(this->get_root()) == false) {
+		return 23;
 	}
-	if (dir_exists(this->get_root()) == false) {
-		return 26;
-	}
-
 	// index check
-	if (this->get_index().size() == 0) {
-		// TODO throw error
-		return 27;
-	}
-	if (file_exists(this->get_root() + this->get_index()) == false) {
-		// TODO throw error
-		return 28;
+	if (this->get_index().size() == 0 || file_exists(this->get_root() + this->get_index()) == false) {
+		return 24;
 	}
 
 	if (this->get_redirection().size() > 0 && dir_exists(this->get_redirection()) == false) {
-		return 29;
+		return 25;
 	}
 
 	// methods check
@@ -153,10 +142,9 @@ int								Location::check_location()
 	for (std::map<short, bool>::iterator it = methods.begin(); it != methods.end(); it++) {
 		if (it->second == true)
 			method_check = 1;
-			// TODO throw error
 	}
 	if (method_check == 0)
-		return 30;
+		return 26;
 	return EXIT_SUCCESS;
 }
 
