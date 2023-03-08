@@ -81,10 +81,7 @@ void 	Response::send_response(int client_socket, const std::string& path)
     if (send(client_socket, _response.c_str(), _response.length(), 0) < 0  )
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
-    file.close();
-	// close(client_socket);
-    // client_socket = -1;
-    
+    file.close();    
 }
 
 int		Response::handle_cgi(const std::string& path, std::string& response_body)
@@ -94,7 +91,7 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body)
 	std::string new_path = path;
 	std::string shebang;
 	char buff[1000];
-	memset(buff, 0, 1000); // TODO we need to initialize buff (otherwise gives cond.jump etc. error)
+	memset(buff, 0, 1000); // TODO we need to initialize buff (otherwise gives cond.jump etc. error) (std::fill)
     if (pipe(fd) < 0)
     {
         std::cout << "Error opening pipe" << std::endl;
@@ -148,7 +145,7 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body)
 		pos = response_body.find('\t');
 		while (pos != std::string::npos)
 		{
-			response_body.replace(pos, 1, "&emsp;&emsp;&emsp;&emsp;");
+			response_body.replace(pos, 1, "&emsp;");
 			pos = response_body.find('\t', pos);
 		}
 		response_body.push_back('\0');

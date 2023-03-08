@@ -13,7 +13,7 @@ class ServerManager {
 		std::vector<Config> _configs;
 		size_t				_nfds;
 		struct pollfd*		_fds;
-		int					_nready;
+		int					_nbr_fd_ready;
 		std::map<int, int>	_map_server_fd;
         // 	ServerManager(ServerManager const &copy);
         //  ServerManager &operator=(ServerManager const &rhs);

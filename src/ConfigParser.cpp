@@ -228,7 +228,7 @@ void ConfigParser::clean_index(std::string line)
 	this->get_config(this->get_n_servers() - 1).set_index(line);
 }
 
-void			ConfigParser::clean_cgi_ext(std::string line, CGI &cgi)
+void			ConfigParser::clean_cgi_ext(std::string line, configCGI &cgi)
 {
 	size_t pos = 0;
 	size_t pos2 = 0;

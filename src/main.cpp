@@ -1,11 +1,9 @@
-#include <iostream>
 #include <string>
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+// #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <poll.h>
 #include <errno.h>
 #include <stdio.h>
@@ -31,7 +29,7 @@ int main(int argc, char** argv)
 	ConfigParser configs;
 
 	if (argc == 2) {
-		// TODO assignment operator
+		// TODO try catch block
 		configs = ConfigParser(argv[1]);
 	}
 	if (configs.get_error_code() != 0)

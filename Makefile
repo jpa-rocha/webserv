@@ -27,7 +27,7 @@ SRCDIR =		./src/
 SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)ConfigParser.cpp	\
 			$(SRCDIR)Location.cpp		\
-			$(SRCDIR)CGI.cpp			\
+			$(SRCDIR)configCGI.cpp			\
 			$(SRCDIR)httpHeader.cpp		\
 			$(SRCDIR)Server.cpp			\
 			$(SRCDIR)ServerManager.cpp	\

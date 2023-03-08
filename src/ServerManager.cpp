@@ -5,6 +5,14 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 
     for (size_t i = 0; i < this->_configs.size(); i++)
     {
+		/*
+			TODO
+			if config[i].get_error_code == 0
+			try
+				push to server
+			catch
+				faulty config
+		*/
         Server server = Server(this->_configs[i]);
         if (server.getError() != 0)
             continue ;
@@ -40,11 +48,11 @@ int ServerManager::run_servers()
 	bool	compress_array = false;
 	while (SWITCH)
     {
-		// TODO this->_nready what does it mean? better name?
-        this->_nready = poll(this->_fds, this->_nfds, -1);
-        if (this->_nready == -1)
+        this->_nbr_fd_ready = poll(this->_fds, this->_nfds, -1);
+        if (this->_nbr_fd_ready == -1)
         {
-            perror("poll");
+            // TODO possible throw error
+			perror("poll");
             return 1;
         }
 		int	current_size = this->_nfds;
@@ -62,7 +70,8 @@ int ServerManager::run_servers()
 				connection_fd = accept(this->_servers[i].get_sockfd(), NULL, NULL);
 				if (connection_fd < 0)
 				{
-                    perror("accept");
+                     // TODO possible throw error
+					perror("accept");
             		return 1;
                 }
 				this->_fds[this->_nfds].fd = connection_fd;
@@ -96,6 +105,7 @@ int ServerManager::run_servers()
 							if (errno != EWOULDBLOCK) //TODO cannot use errno
 							{
 								close_connection = true;
+								 // TODO possible throw error
 								perror("recv");
 							}
 							break ;
@@ -211,7 +221,7 @@ int ServerManager::run_servers()
 // 				this->_servers[it->second].send_response(connfd, request.getUri());
 // 			}
 
-// 			if (--this->_nready <= 0)
+// 			if (--this->_nbr_fd_ready <= 0)
 // 			{
 // 				break;
 // 			}
@@ -261,7 +271,7 @@ int ServerManager::run_servers()
 //                 {
 //                     this->_nfds++;
 //                 }
-//                 if (--this->_nready <= 0)
+//                 if (--this->_nbr_fd_ready <= 0)
 //                 {
 //                     break ;
 //                 }
