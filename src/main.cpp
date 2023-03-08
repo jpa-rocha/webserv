@@ -20,6 +20,7 @@
 #include "../include/ServerManager.hpp"
 #include "../include/minilib.hpp"
 
+//TODO lable headers
 
 int main(int argc, char** argv)
 {
@@ -35,7 +36,8 @@ int main(int argc, char** argv)
 	}
 	if (configs.get_error_code() != 0)
 		return EXIT_FAILURE;
-
+	
+	//TODO check for error files paths
 	/*
 		test
 	*/

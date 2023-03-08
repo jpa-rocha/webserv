@@ -1,9 +1,10 @@
 #ifndef SERVERMANAGER_HPP
 # define SERVERMANAGER_HPP
 
-#include <poll.h>
+# include <poll.h>
 # include "Server.hpp"
 # include "Config.hpp"
+# include "Response.hpp"
 
 class ServerManager {
 	
