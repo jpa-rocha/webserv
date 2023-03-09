@@ -60,7 +60,7 @@ void 	Response::send_response(int client_socket, const std::string& path)
 		}
 		else if (_respond_path.compare(_respond_path.length() - 4, 4, ".css") == 0) {
 			std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
-			std::string css = readFile("docs/www/utils/style.css");
+			std::string css = readFile(_respond_path);
 			_response_stream << HTTPS_OK << _types.get_content_type(".css") << css;
 		}
 		else if (_respond_path.compare(_respond_path.length() - 4, 4, ".png") == 0) {
@@ -71,8 +71,8 @@ void 	Response::send_response(int client_socket, const std::string& path)
 		}
 		else if (_is_cgi == true) {
 			std::cout << path << std::endl;
-			this->handle_cgi(path, _response_body);
-            _response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
+			if (this->handle_cgi(path, _response_body) == EXIT_SUCCESS)
+            	_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
 		}
     }
 	
@@ -103,14 +103,22 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body)
 	std::cout << new_path << std::endl;
 	file.open(new_path.c_str(), std::ios::in);
 	if (file.fail() == true) {
+		close(fd[0]);
+		close(fd[1]);
 		// TODO some error checking - what to return?
 		std::cout << "DOES NOT EXIST" << std::endl;
+		send_404(_config.get_root(), _response_stream);
 		return EXIT_FAILURE;
 	}
 	getline(file, shebang);
 	// TODO invalid file, no shebang
 	if (shebang.find("#!") == std::string::npos)
+	{
+		close(fd[0]);
+		close(fd[1]);
+		file.close();
 		return EXIT_FAILURE;
+	}
 	size_t pos = shebang.find_last_of("/");
 	shebang = &shebang[pos] + 1;
 	file.close();
@@ -174,6 +182,7 @@ void	Response::exec_script(int *pipe, std::string path, std::string program)
 	close(pipe[1]);
     execve(args[0], args, NULL);
     perror("execve failed.");
+	exit(0);
 }
 
 void 	Response::send_404(std::string root, std::ostringstream &response_stream)

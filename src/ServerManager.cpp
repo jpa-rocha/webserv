@@ -153,15 +153,22 @@ int ServerManager::run_servers()
 		if (compress_array)
 		{
 			compress_array = false;
-			for (size_t i = 0; i < this->_nfds; i++)
+			for (size_t i = 2; i < this->_nfds; i++)
 			{
 				if (this->_fds[i].fd == -1)
 				{
-					for (size_t j = i; j < this->_nfds; j++)
+					for (size_t j = this->_nfds - 1; j > i; j--)
 					{
-						this->_fds[j].fd = this->_fds[j + 1].fd;
-						this->_fds[j].events = this->_fds[j + 1].events;
-						this->_fds[j].revents = this->_fds[j + 1].revents;
+						if (this->_fds[j].fd != -1)
+						{
+							this->_fds[i].fd = this->_fds[j].fd;
+							this->_fds[i].events = this->_fds[j].events;
+							this->_fds[i].revents = this->_fds[j].revents;
+							this->_fds[j].fd = -1;
+							this->_fds[j].events = 0;
+							this->_fds[j].revents = 0;	
+							break ;
+						}
 					}
 					i--;
 					this->_nfds--;
