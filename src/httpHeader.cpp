@@ -91,25 +91,25 @@ void httpHeader::setMethod(std::string tmp_method)
 		case 1:
 			this->_method = POST;
 			break;
-		case 3:
+		case 2:
 			this->_method = DELETE;
 			break;
-		case 4:
+		case 3:
 			this->_method = PUT;
 			break;
-		case 5:
+		case 4:
 			this->_method = HEAD;
 			break;
-		case 6:
+		case 5:
 			this->_method = OPTIONS;
 			break;
-		case 7:
+		case 6:
 			this->_method = TRACE;
 			break;
-		case 8:
+		case 7:
 			this->_method = CONNECT;
 			break;
-		case 9:
+		case 8:
 			this->_method = NONE;
 			break;
 		default:
@@ -129,7 +129,37 @@ void httpHeader::setVersion(std::string version)
 
 void httpHeader::printHeader()
 {
-	std::cout << GREEN <<"Method: " << YELLOW << _method << RESET << std::endl;
+	std::string method;
+	switch (_method) {
+		case 0:
+			method = "GET";
+			break;
+		case 1:
+			method = "POST";
+			break;
+		case 2:
+			method = "DELETE";
+			break;
+		case 3:
+			method = "PUT";
+			break;
+		case 4:
+			method = "HEAD";
+			break;
+		case 5:
+			method = "OPTIONS";
+			break;
+		case 6:
+			method = "TRACE";
+			break;
+		case 7:
+			method = "CONNECT";
+			break;
+		case 8:
+			method = "NONE";
+			break;				
+	}
+	std::cout << GREEN <<"Method: " << YELLOW << method << RESET << std::endl;
     std::cout << GREEN << "URI: " << YELLOW << _uri << RESET << std::endl;
     std::cout << GREEN << "HTTP Version: " << YELLOW << _version << RESET << std::endl;
 

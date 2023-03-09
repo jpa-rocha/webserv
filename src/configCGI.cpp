@@ -104,7 +104,6 @@ int											configCGI::cgi_check()
 	// provided programm paths are vealid
 	std::map<std::string, std::string> paths = this->get_path();
 	std::map<std::string, std::string>::const_iterator p_it = paths.begin();
-	std::cout << "program paths: " << std::endl;
 	while (p_it != paths.end()) {
 		if (file_exists(p_it->second) == false) {
 			return 28;
