@@ -134,16 +134,18 @@ int			get_method_num(std::string method)
 		return 0;
 	else if (method == "POST")
 		return 1;
-	else if (method == "PUT")
+	else if (method == "DELETE")
 		return 2;
-	else if (method == "HEAD")
+	else if (method == "PUT")
 		return 3;
-	else if (method == "OPTIONS")
+	else if (method == "HEAD")
 		return 4;
-	else if (method == "TRACE")
+	else if (method == "OPTIONS")
 		return 5;
-	else if (method == "CONNECT")
+	else if (method == "TRACE")
 		return 6;
+	else if (method == "CONNECT")
+		return 7;
 	else
 		return -1;
 }
