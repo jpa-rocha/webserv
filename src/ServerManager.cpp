@@ -5,37 +5,43 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 
     for (size_t i = 0; i < this->_configs.size(); i++)
     {
-		/*
-			TODO
-			if config[i].get_error_code == 0
-			try
-				push to server
-			catch
-				faulty config
-		*/
 		try {
 			this->_configs[i].check_config();
         	Server server = Server(this->_configs[i]);
        		this->_servers.push_back(server);
 		}
 		catch (std::logic_error &e) {
-			std::cout << e.what() << std::endl;
+			// TODO format error properly
+			std::cerr << std::endl;
+			std::cerr << RED << "------------------------------------------------------------------------" << std::endl;
+			std::cerr << std::endl;
+			std::cerr << "Could not create server at index: " << i  << std::endl;
+			std::cerr << "Server name: " << this->_configs[i].get_server_name()  << std::endl;
+			std::cerr << e.what() << std::endl;
+			std::cerr << std::endl;
+			std::cerr << "------------------------------------------------------------------------" << RESET << std::endl;
+			std::cerr << std::endl;
 		}
         /* if (server.getError() != 0)
             continue ; */
     }
-	
-	this->_fds = new struct pollfd[MAX_CONN * this->_servers.size()];
-    this->pollfd_init();
-	this->_nfds = this->_servers.size();
-	this->run_servers();
+	if (this->get_servers().size() > 0) {
+		this->_fds = new struct pollfd[MAX_CONN * this->_servers.size()];
+		this->pollfd_init();
+		this->_nfds = this->_servers.size();
+		this->run_servers();
+	}
+	else
+		std::cerr << RED << NO_VALID_SERVERS << RESET << std::endl; 
 }
 
 ServerManager::~ServerManager()
 {
 	for (size_t i = 0; i < this->get_servers().size(); i++)
 		this->get_server_at(i).clean_fd();
-	delete [] this->_fds;
+	if (this->get_servers().size() > 0) {
+		delete [] this->_fds;
+	}
 }
 
 void ServerManager::pollfd_init()
