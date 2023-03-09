@@ -1,17 +1,35 @@
 #include "Response.hpp"
 
-
-Response::Response(int conn_fd, int server_fd, Config& config, httpHeader& request): _config(config), _request(request)
-{
-    _conn_fd = conn_fd;
-    _server_fd = server_fd;
-    send_response(_conn_fd, request.getUri());
-}
-
 Response::Response(int conn_fd, int server_fd, Config& config): _config(config)
 {
     _conn_fd = conn_fd;
     _server_fd = server_fd;
+}
+
+Response::Response(const Response &src)
+{
+	*this = src;
+}
+
+Response &Response::operator=(const Response &src)
+{
+	if (this != &src)
+	{
+		_httpVersion = src._httpVersion;
+		_response_number = src._response_number;
+		_buff = src._buff;
+        _conn_fd = src._conn_fd;
+        _server_fd = src._server_fd;
+		_req_uri = src._req_uri;
+		_is_cgi = src._is_cgi;
+        _types = src._types;
+		_response_body = src._response_body;
+		_respond_path = src._respond_path;
+		_response = src._response;
+		_config = src._config;
+		_request = src._request;
+	}
+	return *this;
 }
 
 Response::~Response()
@@ -19,23 +37,27 @@ Response::~Response()
 
 }
 
-void 	Response::send_response(int client_socket, const std::string& path)
+void 	Response::send_response()
 {
+	std::ostringstream response_stream;
 /* --------------------------------------------------------------------------- */
     //TODO get path function
-	if (path == "/")
+	_respond_path.clear();
+	_response_body.clear();
+	if (_request.getUri() == "/")
 		_respond_path = _config.get_index();
-	else if (path.find("cgi-bin") != std::string::npos)
+	else if (_request.getUri().find("cgi-bin") != std::string::npos)
 		_is_cgi = true;
     else
-    	_respond_path = path;
+    	_respond_path = _request.getUri();
     _respond_path = _config.get_root() + clean_response_path(_respond_path);
     std::ifstream file(_respond_path.c_str());
 /* --------------------------------------------------------------------------- */
     std::cout << RED << _respond_path << RESET << std::endl;
 	if (!file.is_open())
 	{
-       send_404(_config.get_root(), _response_stream);
+		std::cout << std::endl << RED << "CANT OPEN" << RESET << std::endl << std::endl;
+    	send_404(_config.get_root(), response_stream);
 	}
     else
     {
@@ -50,64 +72,66 @@ void 	Response::send_response(int client_socket, const std::string& path)
 		*/
 		if (_request.getMethod() == GET)
 		{
-			responseToGET(file, path);
+			responseToGET(file, _request.getUri(), response_stream);
 		}
 		if (_request.getMethod() == POST)
 		{
-			_response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A POST REQUEST";
+			response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A POST REQUEST";
 		}
 		if (_request.getMethod() == DELETE)
 		{
-			_response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A DELETE REQUEST";
+			response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A DELETE REQUEST";
 		}
 
     }
 	
 	// Send the response to the client
-	_response = _response_stream.str();
-    if (send(client_socket, _response.c_str(), _response.length(), 0) < 0  )
+	_response = response_stream.str();
+    if (send(this->_conn_fd, _response.c_str(), _response.length(), 0) < 0  )
         std::cerr << RED << _RES_ERROR << RESET << std::endl;
 
     file.close();    
 }
 
-void	Response::responseToGET(std::ifstream &file, const std::string& path)
+void	Response::responseToGET(std::ifstream &file, const std::string& path, std::ostringstream &response_stream)
 {
+	std::cout << std::endl << RED << path << RESET << std::endl;
 	std::stringstream	file_buffer;
+
 	if (_respond_path.compare(_respond_path.length() - 5, 5, ".html") == 0) {
 
 		std::cout << BLUE <<  "----HTML----" << RESET << std::endl;
 		file_buffer << file.rdbuf();
 		_response_body = file_buffer.str();
-		_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
+		response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
 	}
 	else if (_respond_path.compare(_respond_path.length() - 4, 4, ".ico") == 0)
 	{
 		std::cout << BLUE <<  "----ICO----" << RESET << std::endl;
 		file_buffer << file.rdbuf();
 		_response_body = file_buffer.str();
-		_response_stream << HTTPS_OK << _types.get_content_type(".ico") << _response_body;
+		response_stream << HTTPS_OK << _types.get_content_type(".ico") << _response_body;
 	}
 	else if (_respond_path.compare(_respond_path.length() - 4, 4, ".css") == 0) {
 		std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
 		std::string css = readFile(_respond_path);
-		_response_stream << HTTPS_OK << _types.get_content_type(".css") << css;
+		response_stream << HTTPS_OK << _types.get_content_type(".css") << css;
 	}
 	else if (_respond_path.compare(_respond_path.length() - 4, 4, ".png") == 0) {
 		std::cout << BLUE <<  "----PNG----" << RESET << std::endl;
 		file_buffer << file.rdbuf();
 		_response_body = file_buffer.str();
-		_response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
+		response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
 	}
 	else if (_is_cgi == true) {
 		// std::cout << path << std::endl;
-		if (this->handle_cgi(path, _response_body) == EXIT_SUCCESS)
-			_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
+		if (this->handle_cgi(path, _response_body, response_stream) == EXIT_SUCCESS)
+			response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
 	}
 }
 
 
-int		Response::handle_cgi(const std::string& path, std::string& response_body)
+int		Response::handle_cgi(const std::string& path, std::string& response_body, std::ostringstream &response_stream)
 {
     std::ifstream file;
 	int fd[2];
@@ -130,7 +154,7 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body)
 		close(fd[1]);
 		// TODO some error checking - what to return?
 		std::cout << "DOES NOT EXIST" << std::endl;
-		send_404(_config.get_root(), _response_stream);
+		send_404(_config.get_root(), response_stream);
 		return EXIT_FAILURE;
 	}
 	getline(file, shebang);
@@ -227,4 +251,14 @@ void 	Response::send_404(std::string root, std::ostringstream &response_stream)
 	}
 }
 
-void	Response::
+void	Response::new_request(httpHeader &request)
+{
+	this->_request = request;
+}
+
+bool	Response::response_complete() const
+{
+	if (_buff.empty())
+		return true;
+	return false;
+}

@@ -1,5 +1,10 @@
 #include "../include/httpHeader.hpp"
 
+httpHeader::httpHeader()
+{
+	
+}
+
 httpHeader::httpHeader(std::string header)
 {
 	size_t start = 0, end = 0;

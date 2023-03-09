@@ -91,7 +91,15 @@ int ServerManager::run_servers()
 				this->_responses.insert(std::map<int, Response>::value_type(this->_fds[this->_nfds].fd, Response(this->_fds[this->_nfds].fd, this->_servers[i].get_sockfd(), this->_servers[i].get_config())));
 				this->_nfds++;
 			}
-			else
+			else if (this->_fds[i].revents & POLLOUT)
+			{
+				std::cout << RED << "HERE" << RESET << std::endl;
+				std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
+				response_it->second.send_response();
+				if (response_it->second.response_complete())
+					this->_fds[i].events = POLLIN;
+			}
+			else if (this->_fds[i].revents & POLLIN)
 			{
 				close_connection = false;
 				bool	file_read = false;
@@ -131,17 +139,17 @@ int ServerManager::run_servers()
 						close_connection = true;
 						break ;
 					}
-					/* [ SEND_RESPONSE ] */
+					/* [ prepare response ] */
 					file_read = true;
 					httpHeader request(buffer);
 					request.printHeader();
 					memset(buffer, 0, this->_servers[it->second].get_config().get_client_max_body_size());
-					//this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
 					std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
-					response_it->second.
-					Response obj(this->_fds[i].fd, this->_servers[it->second].get_sockfd(), \
-						this->_servers[it->second].get_config(), request);
-
+					response_it->second.new_request(request);
+					this->_fds[i].events = POLLIN | POLLOUT;
+					response_it->second.send_response();
+					if (response_it->second.response_complete())
+						this->_fds[i].events = POLLIN;
 				}
 				if (close_connection)
 				{
