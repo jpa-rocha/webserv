@@ -12,13 +12,13 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 		}
 		catch (std::logic_error &e) {
 			std::cerr << std::endl;
-			std::cerr << RED << "------------------------------------------------------------------------" << std::endl;
+			std::cerr << RED << "---------------------------------------------------------------------------" << std::endl;
 			std::cerr << std::endl;
 			std::cerr << "Could not create server at index: " << i  << std::endl;
 			std::cerr << "Server name: " << this->_configs[i].get_server_name()  << std::endl;
 			std::cerr << e.what() << std::endl;
 			std::cerr << std::endl;
-			std::cerr << "------------------------------------------------------------------------" << RESET << std::endl;
+			std::cerr << "---------------------------------------------------------------------------" << RESET << std::endl;
 			std::cerr << std::endl;
 		}
     }

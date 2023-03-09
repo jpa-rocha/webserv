@@ -157,6 +157,9 @@ extern int SWITCH;
 // error_code 27
 # define INVALID_CGI_ROOT "ERROR: --- Provided  ** cgi-bin root ** does not exist ---"
 
+// error_code 27
+# define INVALID_PROGRAM_PATH "ERROR: --- One of your provided ** path ** does not exist ---"
+
 // error_code 
 # define NO_VALID_SERVERS "ERROR: --- No valid configurations provided to create servers ---"
 
