@@ -136,7 +136,7 @@ int ServerManager::run_servers()
 					//this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
 					
 					Response obj(this->_fds[i].fd, this->_servers[it->second].get_sockfd(), \
-						this->_servers[it->second].get_config(), request.getUri());
+						this->_servers[it->second].get_config(), request);
 
 				}
 				if (close_connection)

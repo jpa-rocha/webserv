@@ -1,18 +1,18 @@
 #include "Response.hpp"
 
 
-Response::Response(int conn_fd, int server_fd, Config& config, std::string req_uri) : _config(config)
+Response::Response(int conn_fd, int server_fd, Config& config, httpHeader& request) : _config(config), _request(request)
 {
     _conn_fd = conn_fd;
     _server_fd = server_fd;
-    send_response(_conn_fd, req_uri);
+    send_response(_conn_fd, request.getUri());
 };
 
 
 Response::~Response()
 {
 
-};
+}
 
 void 	Response::send_response(int client_socket, const std::string& path)
 {
@@ -43,6 +43,23 @@ void 	Response::send_response(int client_socket, const std::string& path)
 				- send the response
 				- close the file
 		*/
+		if (_request.getMethod() == GET)
+		{
+			responseToGET(file, path);
+		}
+    }
+	
+	// Send the response to the client
+	_response = _response_stream.str();
+    if (send(client_socket, _response.c_str(), _response.length(), 0) < 0  )
+        std::cerr << RED << _RES_ERROR << RESET << std::endl;
+
+    file.close();    
+}
+
+void	Response::responseToGET(std::ifstream &file, const std::string& path)
+{
+		
 		std::stringstream	file_buffer;
 		if (_respond_path.compare(_respond_path.length() - 5, 5, ".html") == 0) {
 
@@ -70,19 +87,12 @@ void 	Response::send_response(int client_socket, const std::string& path)
 			_response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
 		}
 		else if (_is_cgi == true) {
-			std::cout << path << std::endl;
+			// std::cout << path << std::endl;
 			if (this->handle_cgi(path, _response_body) == EXIT_SUCCESS)
             	_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
 		}
-    }
-	
-	// Send the response to the client
-	_response = _response_stream.str();
-    if (send(client_socket, _response.c_str(), _response.length(), 0) < 0  )
-        std::cerr << RED << _RES_ERROR << RESET << std::endl;
-
-    file.close();    
 }
+
 
 int		Response::handle_cgi(const std::string& path, std::string& response_body)
 {

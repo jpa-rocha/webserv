@@ -24,13 +24,14 @@ class Response
 		std::string			        _response;
 		std::ostringstream	        _response_stream;
 		Config&      	   			_config;
+		httpHeader& 				_request;
     
         Response();
         Response(Response const &cpy);
         Response &operator=(Response const &rhs);
 
     public:
-		Response(int conn_fd, int server_fd, Config& config, std::string req_uri);
+		Response(int conn_fd, int server_fd, Config& config, httpHeader& request);
         ~Response();
 
         void 	send_response(int client_socket, const std::string& path);
@@ -39,6 +40,8 @@ class Response
         void	exec_script(int *pipe, std::string path, std::string program);
 
         void 	send_404(std::string root, std::ostringstream &response_stream);
+
+		void	responseToGET(std::ifstream &file, const std::string& path);
 };
 
 #endif
