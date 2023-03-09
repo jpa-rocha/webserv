@@ -217,18 +217,32 @@ void						Config::check_config()
 
 std::ostream& operator<<(std::ostream& os, Config& config)
 {
-	os << config.get_port() << std::endl;
-	os << config.get_host() << std::endl;
-	//os << config.get_default_error() << std::endl;
-	os << config.get_server_name() << std::endl;
-	os << config.get_client_max_body_size() << std::endl;
-	os << config.get_root() << std::endl;
-	os << config.get_index() << std::endl;
-	//os << config.get_location().at("/") << std::endl;
+	os << "port: " << config.get_port() << std::endl;
+	os << "host: " << config.get_host() << std::endl;
+	
+	std::map<int, std::string> errors = config.get_default_error();
+	std::map<int, std::string>::const_iterator e_it = errors.begin();
+	std::cout << "error paths: " << std::endl;
+	while (e_it != errors.end()) {
+		os << e_it->first << " : " << e_it->second << std::endl;
+		e_it++;
+	}
+	
+	os << "server name: "<< config.get_server_name() << std::endl;
+	os << "client max body size: " << config.get_client_max_body_size() << std::endl;
+	os << "root: " << config.get_root() << std::endl;
+	os << "index: " << config.get_index() << std::endl;
+	
+	std::map<std::string, Location> locations = config.get_location();
+	std::map<std::string, Location>::iterator l_it = locations.begin();
+	while (l_it != locations.end()) {
+		os << std::endl;
+		os << "location: " <<l_it->first << std::endl;
+		os << l_it->second << std::endl;
+		l_it++;
+	}
+	
+	os << "cgi config: " << std::endl;
 	os << config.get_cgi() << std::endl;
 	return (os);
-/* os << this-> << std::endl;
-os << this-> << std::endl;
-	os << this-> << std::endl; */
-	
 }

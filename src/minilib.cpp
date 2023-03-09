@@ -153,7 +153,6 @@ void signal_callback_handler(int signum) {
    // Terminate program
 	(void) signum;
  	SWITCH = 0;
-   //exit(signum);
 }
 std::string clean_response_path(std::string response_path)
 {
