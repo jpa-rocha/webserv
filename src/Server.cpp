@@ -32,8 +32,8 @@ int	Server::init_socket()
 	if (fcntl(this->_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		std::cerr << RED << FCNTL_ERROR << RESET << std::endl;
-		this->_error = 28;
-		return 28;
+		this->_error = 29;
+		return 29;
 	}
 	return EXIT_SUCCESS;
 }
