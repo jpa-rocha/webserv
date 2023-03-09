@@ -23,9 +23,9 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
 		}
     }
 	if (this->get_servers().size() > 0) {
-		this->_fds = new struct pollfd[MAX_CONN * this->_servers.size()];
+		this->_fds = new struct pollfd[MAX_CONN * this->get_servers().size()];
 		this->pollfd_init();
-		this->_nfds = this->_servers.size();
+		this->_nfds = this->get_servers().size();
 		this->run_servers();
 	}
 	else
@@ -55,10 +55,11 @@ int ServerManager::run_servers()
 	// This whole thing probably has memory leaks
 	bool	close_connection = false;
 	bool	compress_array = false;
+	int		nbr_fd_ready;
 	while (SWITCH)
     {
-        this->_nbr_fd_ready = poll(this->_fds, this->_nfds, -1);
-        if (this->_nbr_fd_ready == -1)
+        nbr_fd_ready = poll(this->_fds, this->_nfds, -1);
+        if (nbr_fd_ready == -1)
         {
             // TODO avoid killing the server, implement test how to deal with it 
 			perror("poll");
@@ -71,16 +72,18 @@ int ServerManager::run_servers()
 				continue ;
 			if (this->_fds[i].revents != POLLIN) {
 				std::cout << RED << "[ UNEXPECTED REVENTS VALUE ]" << RESET << std::endl;
-				return (1);
+				nbr_fd_ready--;
+				continue ;
 			}
-			if (this->_fds[i].fd == this->_servers[i].get_sockfd())
+			if (i < (int)this->get_servers().size())
 			{
 				int	connection_fd;
 				connection_fd = accept(this->_servers[i].get_sockfd(), NULL, NULL);
 				if (connection_fd < 0)
 				{
-                     // TODO avoid killing the server, implement test how to deal with it (This fix might work, need to test it out)
+                    // TODO avoid killing the server, implement test how to deal with it (This fix might work, need to test it out)
 					perror("accept");
+					nbr_fd_ready--;
 					continue ;
                 }
 				this->_fds[this->_nfds].fd = connection_fd;
@@ -98,7 +101,6 @@ int ServerManager::run_servers()
 					char	buffer[this->_servers[it->second].get_config().get_client_max_body_size()];
 					int		received;
 
-					// recv shows an error while tring to acces favicon
 					std::cout << this->_fds[i].fd << std::endl;
 					if (file_read == false)
 					{
@@ -146,6 +148,9 @@ int ServerManager::run_servers()
 					compress_array = true;
 				}
 			}
+			nbr_fd_ready--;
+			if (nbr_fd_ready == 0)
+				break ;
 		}
 		if (compress_array)
 		{
