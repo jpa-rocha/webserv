@@ -163,6 +163,9 @@ extern int SWITCH;
 // error_code 28
 # define NO_VALID_CONFIG_FILE "ERROR: --- Could not open provided configuration file ---"
 
+// error_code 29
+# define FCNTL_ERROR "ERROR: --- Could not make socket non-blocking ---"
+
 // error_code 
 # define NO_VALID_SERVERS "ERROR: --- No valid configurations provided to create servers ---"
 
