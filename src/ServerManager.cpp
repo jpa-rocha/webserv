@@ -11,7 +11,6 @@ ServerManager::ServerManager(std::vector<Config> configs): _configs(configs), _n
        		this->_servers.push_back(server);
 		}
 		catch (std::logic_error &e) {
-			// TODO format error properly
 			std::cerr << std::endl;
 			std::cerr << RED << "------------------------------------------------------------------------" << std::endl;
 			std::cerr << std::endl;

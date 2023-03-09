@@ -96,7 +96,6 @@ void										configCGI::set_ext(std::string ext)
 
 int											configCGI::cgi_check()
 {
-	// root check
 	if (this->get_root().size() == 0 || dir_exists(this->get_root()) == false) {
 		return 27;
 	}
