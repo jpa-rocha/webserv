@@ -23,16 +23,10 @@ int main(int argc, char** argv)
 	if (configs.get_error_code() != 0)
 		return EXIT_FAILURE;
 	
-	//TODO check for error files paths
-	/*
-		test
-	*/
 	
-		std::cout << configs.get_config(0) << std::endl;
+	
+		//std::cout << configs.get_config(0) << std::endl;
 
-	/*
-		end
-	*/
 	signal(SIGINT, signal_callback_handler);
 	ServerManager manager(configs.get_configs());
 

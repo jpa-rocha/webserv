@@ -11,12 +11,13 @@
 #include "minilib.hpp"
 #include "Utils.hpp"
 
+
 	class Config {
 		private:
   			int 								_client_max_body_size;
 			bool								_autoindex;
 			uint16_t							_port;
-  			in_addr_t							_host;                  
+  			in_addr								_host;                  
   			std::string							_server_name;
   			std::string							_root;
   			std::string							_index;
@@ -33,7 +34,7 @@
 
 			// getters
 			u_int16_t							&get_port();
-			in_addr_t							&get_host();                  
+			in_addr								&get_host();                  
   			std::string							&get_server_name();
  			std::map<int, std::string>			&get_default_error();
 			std::string							&get_error_path(int error);

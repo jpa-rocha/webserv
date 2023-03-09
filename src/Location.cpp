@@ -121,20 +121,20 @@ void										Location::set_alias(std::string	alias)
 
 int								Location::check_location()
 {
-	// root check
+	// root value exists and given directory exists
 	if (this->get_root().size() == 0 || dir_exists(this->get_root()) == false) {
 		return 23;
 	}
-	// index check
+	// index value exists and given file exists
 	if (this->get_index().size() == 0 || file_exists(this->get_root() + this->get_index()) == false) {
 		return 24;
 	}
-
+	// if redirection path is given check if file exists
 	if (this->get_redirection().size() > 0 && dir_exists(this->get_redirection()) == false) {
 		return 25;
 	}
 
-	// methods check
+	// methods check: at least one method needs to be set to true
 	std::map<short, bool> methods = this->get_methods();
 	int method_check = 0;
 	for (std::map<short, bool>::iterator it = methods.begin(); it != methods.end(); it++) {

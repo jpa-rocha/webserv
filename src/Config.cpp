@@ -47,7 +47,7 @@ u_int16_t					&Config::get_port()
 	return this->_port;
 }
 
-in_addr_t					&Config::get_host()
+in_addr					&Config::get_host()
 {
 	return this->_host;
 }
@@ -118,7 +118,7 @@ void					Config::set_port(u_int16_t port)
 
 void					Config::set_host(in_addr_t host)
 {
-	this->_host = host;
+	this->_host.s_addr = host;
 }
 
 void					Config::set_server_name(std::string server_name)
@@ -168,19 +168,19 @@ void					Config::set_cgi(std::ifstream& config_file, std::string line)
 //TODO create test cases
 void						Config::check_config()
 {
-	// root check
+	// root value exists and given directory exists
 	if (this->get_root().size() == 0 || dir_exists(this->get_root()) == false) {
 		this->set_error_code(20);
 		throw std::logic_error(INVALID_ROOT);
 	}
 	
-	// index check
+	// index value exists and given file exists
 	if (this->get_index().size() == 0 || file_exists(this->get_root() + this->get_index()) == false) {
 		this->set_error_code(21);
 		throw std::logic_error(INVALID_INDEX);
 	}
 	
-	// default error check
+	// default error check - files provided by paths exist 
 	if (this->get_default_error().size() == 0)
 		this->get_default_error().insert(std::make_pair(404, "/error/404_NotFound.html"));
 	std::map<int, std::string> error = this->get_default_error();
@@ -212,7 +212,8 @@ void						Config::check_config()
 	
 	// CGI check
 	this->set_error_code(this->get_cgi().cgi_check());
-	switch (this->get_cgi().get_error_code()) {
+	int cgi_error = this->get_error_code();
+	switch (cgi_error) {
 		case 27:
 			throw std::logic_error(INVALID_CGI_ROOT);
 		case 28:
@@ -223,7 +224,7 @@ void						Config::check_config()
 std::ostream& operator<<(std::ostream& os, Config& config)
 {
 	os << "port: " << config.get_port() << std::endl;
-	os << "host: " << config.get_host() << std::endl;
+	os << "host: " << inet_ntoa(config.get_host()) << std::endl;
 	
 	std::map<int, std::string> errors = config.get_default_error();
 	std::map<int, std::string>::const_iterator e_it = errors.begin();

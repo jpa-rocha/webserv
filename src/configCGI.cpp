@@ -96,9 +96,12 @@ void										configCGI::set_ext(std::string ext)
 
 int											configCGI::cgi_check()
 {
+	// root value exists and given directory exists
 	if (this->get_root().size() == 0 || dir_exists(this->get_root()) == false) {
 		return 27;
 	}
+	
+	// provided programm paths are vealid
 	std::map<std::string, std::string> paths = this->get_path();
 	std::map<std::string, std::string>::const_iterator p_it = paths.begin();
 	std::cout << "program paths: " << std::endl;

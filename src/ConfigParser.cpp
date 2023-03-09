@@ -31,7 +31,7 @@ ConfigParser::ConfigParser(std::string config_file)
 	// Check if config file exists
 	in_file.open(config_file.c_str(), std::ios::in);
 	if (in_file.is_open() == false){
-		this->exit_with_error(1, in_file);
+		this->exit_with_error(28, in_file);
 		return;
 	};
 	
@@ -287,6 +287,8 @@ int ConfigParser::exit_with_error(int err_code, std::ifstream& in_file)
 		std::cerr << RED << NO_VALID_CGI_PATH << RESET << std::endl;
 	else if (err_code == 15)
 		std::cerr << RED << NO_VALID_CGI_EXT << RESET << std::endl;
+	else if (err_code == 28)
+		std::cerr << RED << NO_VALID_CONFIG_FILE << RESET << std::endl;
 	in_file.close();
 	this->set_error_code(err_code);
 	return(err_code);
