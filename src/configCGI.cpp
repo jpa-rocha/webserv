@@ -125,28 +125,22 @@ void									configCGI::clean_path(std::string line)
 	if (this->get_path().empty())
 		this->set_error_code(14);
 }
-//TODO hardcoded
+
 std::ostream &operator<<(std::ostream &os, const configCGI &cgi)
 {
-	//os << cgi.get_root() << std::endl;
-	// std::map<std::string, std::string>::iterator it;
-	// std::map<std::string, std::string>::iterator end;
-	// it = cgi.get_path().begin();
-	// end = cgi.get_path().end();
-	// for (; it != end; ++it)
-	// {
-	// 	os << "printing" << std::endl;
-	// 	os << it->first << std::endl;
-	// 	os << it->second << std::endl;
-	// }
-	os << cgi.get_root() << std::endl;
-	os << cgi.get_path().at("python3") << std::endl;
-	os << cgi.get_path().at("bash") << std::endl;
-	os << cgi.get_ext().at(0) << std::endl;
-	os << cgi.get_ext().at(1) << std::endl;
-	// for (std::vector<std::string>::iterator it = cgi.get_ext().begin(); it != cgi.get_ext().end(); ++it)
-	// {
-	// 	os << (*it).data() << std::endl;
-	// }
+	os << "root: " << cgi.get_root() << std::endl;
+	
+	std::map<std::string, std::string> paths = cgi.get_path();
+	std::map<std::string, std::string>::const_iterator p_it = paths.begin();
+	std::cout << "program paths: " << std::endl;
+	while (p_it != paths.end()) {
+		os << p_it->first << " : " << p_it->second << std::endl;
+		p_it++;
+	}
+	std::cout << "allowed extensions: " << std::endl;
+	for (size_t i = 0; i < cgi.get_ext().size(); i++) {
+		std::cout << cgi.get_ext()[i] << std::endl;
+	}
+	
 	return os;
 }

@@ -29,16 +29,12 @@ int main(int argc, char** argv)
 		test
 	*/
 	
-		/* if (configs.get_config(0).check_config() != 0) {
-			std::cout << YELLOW << configs.get_config(0).check_config() << RESET << std::endl;
-			return EXIT_FAILURE;
-		} */
+		std::cout << configs.get_config(0) << std::endl;
 
 	/*
 		end
 	*/
 	signal(SIGINT, signal_callback_handler);
-	//signal(SIGQUIT, signal_callback_handler);
 	ServerManager manager(configs.get_configs());
 
     return EXIT_SUCCESS;

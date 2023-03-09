@@ -5,8 +5,6 @@ Location::Location()
 	this->_root = "";
 	this->_index = "";
 	this->_autoindex = false;
-	// needs to be included later
-	// TODO chage to get on merge
 	this->init_methods();
 	this->_alias = "";
 	this->_redirection = "";
@@ -190,18 +188,54 @@ void							Location::init_methods()
 
 std::ostream &operator<<(std::ostream &os, Location &location)
 {
-	os << location.get_root() << std::endl;
-	os << location.get_autoindex() << std::endl;
-	os << location.check_method_at(0) << std::endl;
-	os << location.check_method_at(1) << std::endl;
-	os << location.check_method_at(2) << std::endl;
-	os << location.check_method_at(3) << std::endl;
-	os << location.check_method_at(4) << std::endl;
-	os << location.check_method_at(5) << std::endl;
-	os << location.check_method_at(6) << std::endl;
-	os << location.check_method_at(7) << std::endl;
-	os << location.get_index() << std::endl;
-	os << location.get_redirection() << std::endl;
-	os << location.get_alias() << std::endl;
+	os << "root: " << location.get_root() << std::endl;
+	os << "index: " << location.get_index() << std::endl;
+	os << "redirection: " << location.get_redirection() << std::endl;
+	os << "alias: " << location.get_alias() << std::endl;
+	std::string autoindex;
+	if (location.get_autoindex() == true)
+		autoindex = "on";
+	else
+		autoindex = "off";
+	os << "autoindex: " << autoindex << std::endl;
+	os << "methods:" << std::endl;
+	std::map<short, bool> methods = location.get_methods();
+	std::map<short, bool>::const_iterator m_it = methods.begin();
+	while (m_it != methods.end()) {
+		std::string method;
+		std::string status;
+		if (m_it->second == 1)
+			status = "true";
+		else 
+			status = "false";
+		switch (m_it->first) {
+			case 0:
+				method = "GET";
+				break;
+			case 1:
+				method = "POST";
+				break;
+			case 2:
+				method = "DELETE";
+				break;
+			case 3:
+				method = "PUT";
+				break;
+			case 4:
+				method = "HEAD";
+				break;
+			case 5:
+				method = "OPTIONS";
+				break;
+			case 6:
+				method = "TRACE";
+				break;
+			case 7:
+				method = "CONNECT";
+				break;
+		}
+		os << method << " : " << status << std::endl;
+		m_it++;
+	}
 	return os;
 }
