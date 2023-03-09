@@ -1,17 +1,23 @@
 #include "Response.hpp"
 
 
-Response::Response(int conn_fd, int server_fd, Config& config) : _config(config)
+Response::Response(int conn_fd, int server_fd, Config& config, httpHeader& request): _config(config), _request(request)
 {
     _conn_fd = conn_fd;
     _server_fd = server_fd;
-};
+    send_response(_conn_fd, request.getUri());
+}
 
+Response::Response(int conn_fd, int server_fd, Config& config): _config(config)
+{
+    _conn_fd = conn_fd;
+    _server_fd = server_fd;
+}
 
 Response::~Response()
 {
 
-};
+}
 
 void 	Response::send_response(int client_socket, const std::string& path)
 {
@@ -42,37 +48,19 @@ void 	Response::send_response(int client_socket, const std::string& path)
 				- send the response
 				- close the file
 		*/
-		std::stringstream	file_buffer;
-		if (_respond_path.compare(_respond_path.length() - 5, 5, ".html") == 0) {
-
-			std::cout << BLUE <<  "----HTML----" << RESET << std::endl;
-			file_buffer << file.rdbuf();
-			_response_body = file_buffer.str();
-			_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
-		}
-		else if (_respond_path.compare(_respond_path.length() - 4, 4, ".ico") == 0)
+		if (_request.getMethod() == GET)
 		{
-			std::cout << BLUE <<  "----ICO----" << RESET << std::endl;
-			file_buffer << file.rdbuf();
-			_response_body = file_buffer.str();
-			_response_stream << HTTPS_OK << _types.get_content_type(".ico") << _response_body;
+			responseToGET(file, path);
 		}
-		else if (_respond_path.compare(_respond_path.length() - 4, 4, ".css") == 0) {
-			std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
-			std::string css = readFile(_respond_path);
-			_response_stream << HTTPS_OK << _types.get_content_type(".css") << css;
+		if (_request.getMethod() == POST)
+		{
+			_response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A POST REQUEST";
 		}
-		else if (_respond_path.compare(_respond_path.length() - 4, 4, ".png") == 0) {
-			std::cout << BLUE <<  "----PNG----" << RESET << std::endl;
-			file_buffer << file.rdbuf();
-			_response_body = file_buffer.str();
-			_response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
+		if (_request.getMethod() == DELETE)
+		{
+			_response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A DELETE REQUEST";
 		}
-		else if (_is_cgi == true) {
-			std::cout << path << std::endl;
-			if (this->handle_cgi(path, _response_body) == EXIT_SUCCESS)
-            	_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
-		}
+
     }
 	
 	// Send the response to the client
@@ -82,6 +70,42 @@ void 	Response::send_response(int client_socket, const std::string& path)
 
     file.close();    
 }
+
+void	Response::responseToGET(std::ifstream &file, const std::string& path)
+{
+	std::stringstream	file_buffer;
+	if (_respond_path.compare(_respond_path.length() - 5, 5, ".html") == 0) {
+
+		std::cout << BLUE <<  "----HTML----" << RESET << std::endl;
+		file_buffer << file.rdbuf();
+		_response_body = file_buffer.str();
+		_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
+	}
+	else if (_respond_path.compare(_respond_path.length() - 4, 4, ".ico") == 0)
+	{
+		std::cout << BLUE <<  "----ICO----" << RESET << std::endl;
+		file_buffer << file.rdbuf();
+		_response_body = file_buffer.str();
+		_response_stream << HTTPS_OK << _types.get_content_type(".ico") << _response_body;
+	}
+	else if (_respond_path.compare(_respond_path.length() - 4, 4, ".css") == 0) {
+		std::cout << BLUE <<  "----CSS----" << RESET << std::endl;
+		std::string css = readFile(_respond_path);
+		_response_stream << HTTPS_OK << _types.get_content_type(".css") << css;
+	}
+	else if (_respond_path.compare(_respond_path.length() - 4, 4, ".png") == 0) {
+		std::cout << BLUE <<  "----PNG----" << RESET << std::endl;
+		file_buffer << file.rdbuf();
+		_response_body = file_buffer.str();
+		_response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
+	}
+	else if (_is_cgi == true) {
+		// std::cout << path << std::endl;
+		if (this->handle_cgi(path, _response_body) == EXIT_SUCCESS)
+			_response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
+	}
+}
+
 
 int		Response::handle_cgi(const std::string& path, std::string& response_body)
 {

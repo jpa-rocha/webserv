@@ -25,6 +25,7 @@ class Response
 		std::string			        _response;
 		std::ostringstream	        _response_stream;
 		Config&      	   			_config;
+		httpHeader& 				_request;
     
         Response();
         Response(Response const &cpy);
@@ -32,6 +33,7 @@ class Response
 
     public:
 		Response(int conn_fd, int server_fd, Config& config);
+		Response(int conn_fd, int server_fd, Config& config, httpHeader& request);
         ~Response();
 
         void 	send_response(int client_socket, const std::string& path);
@@ -42,6 +44,8 @@ class Response
         void 	send_404(std::string root, std::ostringstream &response_stream);
 
 		void	set_uri(std::string uri);
+
+		void	responseToGET(std::ifstream &file, const std::string& path);
 };
 
 #endif
