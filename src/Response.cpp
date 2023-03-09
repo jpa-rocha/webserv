@@ -1,11 +1,10 @@
 #include "Response.hpp"
 
 
-Response::Response(int conn_fd, int server_fd, Config& config, std::string req_uri) : _config(config)
+Response::Response(int conn_fd, int server_fd, Config& config) : _config(config)
 {
     _conn_fd = conn_fd;
     _server_fd = server_fd;
-    send_response(_conn_fd, req_uri);
 };
 
 
@@ -203,3 +202,5 @@ void 	Response::send_404(std::string root, std::ostringstream &response_stream)
 		error404.close();
 	}
 }
+
+void	Response::

@@ -88,6 +88,7 @@ int ServerManager::run_servers()
                 }
 				this->_fds[this->_nfds].fd = connection_fd;
 				this->_fds[this->_nfds].events = POLLIN;
+				this->_responses.insert(std::map<int, Response>::value_type(this->_fds[this->_nfds].fd, Response(this->_fds[this->_nfds].fd, this->_servers[i].get_sockfd(), this->_servers[i].get_config())));
 				this->_nfds++;
 			}
 			else
@@ -136,7 +137,8 @@ int ServerManager::run_servers()
 					request.printHeader();
 					memset(buffer, 0, this->_servers[it->second].get_config().get_client_max_body_size());
 					//this->_servers[it->second].send_response(this->_fds[i].fd, request.getUri());
-					
+					std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
+					response_it->second.
 					Response obj(this->_fds[i].fd, this->_servers[it->second].get_sockfd(), \
 						this->_servers[it->second].get_config(), request.getUri());
 
