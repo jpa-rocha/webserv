@@ -15,3 +15,8 @@ body
 	min-height: 100vh;
 
 }
+
+hr
+{
+	width: 1000px;
+}
