@@ -8,10 +8,7 @@ httpHeader::httpHeader(std::string header)
 	start = end + 1;
 	end = header.find(" ", start);
 	this->_uri = header.substr(start, end - start);
-	if (this->_uri.find("/cgi-bin/images/") == 0)
-		this->_uri.replace(0, 16, "/images/");
-	if (this->_uri.find("/cgi-bin/utils/") == 0)
-		this->_uri.replace(0, 15, "/utils/");
+	std::cout << _uri << std::endl;
 	start = end + 1;
 	end = header.find("\r\n", start);
 	this->_version = header.substr(start, end - start);

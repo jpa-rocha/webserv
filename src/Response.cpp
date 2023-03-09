@@ -189,7 +189,7 @@ void 	Response::send_404(std::string root, std::ostringstream &response_stream)
 {
 	std::string response_body;
 
-	 // if the file cannot be opened, send a 404 error
+	// if the file cannot be opened, send a 404 error
     std::ifstream error404((root + this->_config.get_error_path(404)).c_str());
     if (!error404.is_open())
         std::cerr << RED << _404_ERROR << RESET << std::endl;
