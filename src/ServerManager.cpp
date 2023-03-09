@@ -153,6 +153,7 @@ int ServerManager::run_servers()
 				}
 				if (close_connection)
 				{
+					this->_responses.erase(this->_fds[i].fd);
 					close(this->_fds[i].fd);
 					this->_fds[i].fd = -1;
 					compress_array = true;
