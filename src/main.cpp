@@ -18,7 +18,6 @@ int main(int argc, char** argv)
 	ConfigParser configs;
 
 	if (argc == 2) {
-		// TODO try catch block
 		configs = ConfigParser(argv[1]);
 	}
 	if (configs.get_error_code() != 0)

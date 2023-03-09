@@ -181,6 +181,8 @@ void						Config::check_config()
 	}
 	
 	// default error check
+	if (this->get_default_error().size() == 0)
+		this->get_default_error().insert(std::make_pair(404, "/error/404_NotFound.html"));
 	std::map<int, std::string> error = this->get_default_error();
 	for (std::map<int, std::string>::iterator it = error.begin(); it != error.end(); it++) {
 		if (file_exists(this->get_root() + it->second) == false) {
@@ -210,8 +212,11 @@ void						Config::check_config()
 	
 	// CGI check
 	this->set_error_code(this->get_cgi().cgi_check());
-	if (this->get_error_code() != 0) {
-		throw std::logic_error(INVALID_CGI_ROOT);
+	switch (this->get_cgi().get_error_code()) {
+		case 27:
+			throw std::logic_error(INVALID_CGI_ROOT);
+		case 28:
+			throw std::logic_error(INVALID_PROGRAM_PATH);
 	}
 }
 

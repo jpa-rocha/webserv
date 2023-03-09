@@ -97,7 +97,7 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 			this->set_error_code(2);
 			return false;
 		}
-		// TODO server might need to listen on more than one port
+
 		if ((context && line.find(LISTEN) != std::string::npos) && check_def_format(LISTEN, line))
 			this->clean_listen(line);
 		else if ((context && line.find(HOST) != std::string::npos) && check_def_format(HOST, line))
@@ -145,8 +145,6 @@ bool ConfigParser::check_server_context(std::ifstream& config_file)
 	return true;
 }
 
-
-// TODO what if there are multiple listens
 void ConfigParser::clean_listen(std::string line)
 {
 	line = find_int(line, 1);
