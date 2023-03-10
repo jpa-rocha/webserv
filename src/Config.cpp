@@ -83,7 +83,7 @@ std::string					&Config::get_root()
 	return this->_root;
 }
 
-std::string					&Config::get_index()
+std::string					Config::get_index()
 {
 	return this->_index;
 }

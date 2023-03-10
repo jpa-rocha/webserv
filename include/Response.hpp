@@ -7,7 +7,9 @@
 # include <sys/wait.h>
 # include <cstring>
 # include "Config.hpp"
+# include "httpHeader.hpp"
 
+class httpHeader;
 
 class Response 
 {
@@ -15,30 +17,38 @@ class Response
     private:
 		std::string                 _httpVersion;
 		std::string                 _response_number;
+		std::string					_buff;
         int                         _conn_fd;
         int                         _server_fd;
+		std::string					_req_uri;
 		bool		                _is_cgi;
         MIME                        _types;
 		std::string			        _response_body;
 		std::string			        _respond_path;
 		std::string			        _response;
-		std::ostringstream	        _response_stream;
-		Config&      	   			_config;
+		Config      	   			_config;
     
         Response();
-        Response(Response const &cpy);
-        Response &operator=(Response const &rhs);
 
     public:
-		Response(int conn_fd, int server_fd, Config& config, std::string req_uri);
+		httpHeader	 				_request;
+		Response(int conn_fd, int server_fd, Config& config);
+        Response(Response const &cpy);
+        Response &operator=(Response const &rhs);
         ~Response();
 
-        void 	send_response(int client_socket, const std::string& path);
+        void 	send_response();
 
-        int		handle_cgi(const std::string& path, std::string& response_body);
+        int		handle_cgi(const std::string& path, std::string& response_body, std::ostringstream &response_stream);
         void	exec_script(int *pipe, std::string path, std::string program);
 
         void 	send_404(std::string root, std::ostringstream &response_stream);
+
+		void	new_request(httpHeader &request);
+
+		void	responseToGET(std::ifstream &file, const std::string& path, std::ostringstream &response_stream);
+
+		bool	response_complete() const;
 };
 
 #endif

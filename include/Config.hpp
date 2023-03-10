@@ -41,7 +41,7 @@
   			int 								&get_client_max_body_size();
 			bool								&get_autoindex();
   			std::string							&get_root();
-  			std::string							&get_index();
+  			std::string							get_index();
 			std::map<std::string, Location>		&get_location();
 			configCGI							&get_cgi();
 			int									get_error_code();
