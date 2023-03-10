@@ -44,6 +44,8 @@ void 	Response::send_response()
     //TODO get path function
 	_respond_path.clear();
 	_response_body.clear();
+	_response.clear();
+	_is_cgi = false;
 	if (_request.getUri() == "/")
 		_respond_path = _config.get_index();
 	else if (_request.getUri().find("cgi-bin") != std::string::npos)
@@ -128,6 +130,108 @@ void	Response::responseToGET(std::ifstream &file, const std::string& path, std::
 		if (handler.handle_cgi(response_stream) == EXIT_SUCCESS)
 			response_stream << HTTPS_OK << _types.get_content_type(".html") << _response_body;
 	}
+}
+
+
+int		Response::handle_cgi(const std::string& path, std::string& response_body, std::ostringstream &response_stream)
+{
+    std::ifstream file;
+	int fd[2];
+	std::string new_path = path;
+	std::string shebang;
+	char buff[1000];
+	memset(buff, 0, 1000); // TODO we need to initialize buff (otherwise gives cond.jump etc. error) (std::fill)
+    if (pipe(fd) < 0)
+    {
+        std::cout << "Error opening pipe" << std::endl;
+        return EXIT_FAILURE;
+    }
+	new_path = remove_end(path, '?');
+   	new_path = "." + new_path;
+	// TODO check if ext is allowed
+	std::cout << new_path << std::endl;
+	file.open(new_path.c_str(), std::ios::in);
+	if (file.fail() == true) {
+		close(fd[0]);
+		close(fd[1]);
+		// TODO some error checking - what to return?
+		std::cout << "DOES NOT EXIST" << std::endl;
+		send_404(_config.get_root(), response_stream);
+		return EXIT_FAILURE;
+	}
+	getline(file, shebang);
+	// TODO invalid file, no shebang
+	if (shebang.find("#!") == std::string::npos)
+	{
+		close(fd[0]);
+		close(fd[1]);
+		file.close();
+		return EXIT_FAILURE;
+	}
+	size_t pos = shebang.find_last_of("/");
+	shebang = &shebang[pos] + 1;
+	file.close();
+    if (fork() == 0)
+        exec_script(fd, new_path, shebang);
+    else
+    {
+		waitpid(-1, NULL, 0);
+		close(fd[1]);
+		while (read(fd[0], buff, sizeof(buff) - 1)) {
+			response_body += buff;
+		}
+		std::cout << response_body << std::endl;
+		pos = response_body.find('\n');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "<br>");
+			pos = response_body.find('\n', pos);
+		}
+		pos = response_body.find('\n');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "<br>");
+			pos = response_body.find('\n', pos);
+		}
+		pos = response_body.find(' ');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "&nbsp;&nbsp;");
+			pos = response_body.find(' ', pos);
+		}
+		pos = response_body.find('\t');
+		while (pos != std::string::npos)
+		{
+			response_body.replace(pos, 1, "&emsp;");
+			pos = response_body.find('\t', pos);
+		}
+		response_body.push_back('\0');
+		close(fd[0]);
+    }
+	return EXIT_SUCCESS;
+}
+
+void	Response::exec_script(int *pipe, std::string path, std::string program)
+{
+    char *args[2];
+	size_t i = 0;
+	size_t j = 0;
+    args[0] = new char [_config.get_cgi().get_path().find(program.c_str())->second.length() + 1];
+    for (i = 0; i < _config.get_cgi().get_path().find(program.c_str())->second.length(); i++) {
+        args[0][i] = _config.get_cgi().get_path().find(program.c_str())->second[i];
+	}
+	args[0][i] = '\0';
+    args[1] = new char [path.length() + 1];
+    for (j = 0; j < path.length(); j++) {
+        args[1][j] = path[j];
+	}
+	args[1][j] = '\0';
+    args[2] = NULL;
+	dup2(pipe[1], STDOUT_FILENO);
+	close(pipe[1]);
+    execve(args[0], args, NULL);
+    perror("execve failed.");
+	exit(0);
 }
 
 void 	Response::send_404(std::string root, std::ostringstream &response_stream)
