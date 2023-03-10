@@ -89,9 +89,8 @@ void 	Response::send_response()
 	
 	// Send the response to the client
 	_response = response_stream.str();
-    if (send(this->_conn_fd, _response.c_str(), _response.length(), 0) < 0  )
-        std::cerr << RED << _RES_ERROR << RESET << std::endl;
-
+	if (send(this->_conn_fd, _response.c_str(), _response.length(), 0) < 0)
+    	std::cerr << RED << _RES_ERROR << RESET << std::endl;
     file.close();    
 }
 

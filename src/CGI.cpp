@@ -68,17 +68,19 @@ int		CGI::handle_cgi()//std::ostringstream &response_stream)
 	size_t pos = shebang.find_last_of("/");
 	shebang = &shebang[pos] + 1;
 	file.close();
-    if (fork() == 0)
+	pid_t pid = fork();
+    if (pid == 0)
         exec_script(fd, new_path, shebang);
     else
     {
-		waitpid(-1, NULL, 0);
 		close(fd[1]);
-		while (read(fd[0], buff, sizeof(buff) - 1)) {
+		waitpid(pid, NULL, 0);
+		while (read(fd[0], buff, sizeof(buff))) {
 			_response_body += buff;
+			memset(buff, 0, 1000);
 		}
-		std::cout << _response_body << std::endl;
 		close(fd[0]);
+		std::cout << _response_body << std::endl;
     }
 	return EXIT_SUCCESS;
 }
@@ -88,6 +90,7 @@ void	CGI::exec_script(int *pipe, std::string path, std::string program)
     char *args[2];
 	size_t i = 0;
 	size_t j = 0;
+	close(pipe[0]);
     args[0] = new char [_config.get_cgi().get_path().find(program.c_str())->second.length() + 1];
     for (i = 0; i < _config.get_cgi().get_path().find(program.c_str())->second.length(); i++) {
         args[0][i] = _config.get_cgi().get_path().find(program.c_str())->second[i];
