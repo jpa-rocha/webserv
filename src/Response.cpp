@@ -44,6 +44,8 @@ void 	Response::send_response()
     //TODO get path function
 	_respond_path.clear();
 	_response_body.clear();
+	_response.clear();
+	_is_cgi = false;
 	if (_request.getUri() == "/")
 		_respond_path = _config.get_index();
 	else if (_request.getUri().find("cgi-bin") != std::string::npos)
@@ -175,10 +177,9 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body, s
     {
 		waitpid(-1, NULL, 0);
 		close(fd[1]);
-		while (read(fd[0], buff, sizeof(buff) - 1)) {
+		while (read(fd[0], buff, sizeof(buff))) {
 			response_body += buff;
 		}
-		response_body.push_back('\0');
 		close(fd[0]);
     }
 	return EXIT_SUCCESS;
