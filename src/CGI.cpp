@@ -71,7 +71,7 @@ int		CGI::handle_cgi()//std::ostringstream &response_stream)
     {
 		close(fd[1]);
 		waitpid(pid, NULL, 0);
-		while (read(fd[0], buff, sizeof(buff))) {
+		while (read(fd[0], buff, sizeof(buff) - 1)) {
 			_response_body += buff;
 			memset(buff, 0, 1000);
 		}
