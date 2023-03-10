@@ -16,7 +16,10 @@ class CGI {
 		CGI& operator=(const CGI& obj);
 		~CGI();
 
-		int		handle_cgi(std::ostringstream &response_stream);
+		// getters
+		std::string	get_response_body();
+
+		int		handle_cgi();//std::ostringstream &response_stream);
 		void	exec_script(int *pipe, std::string path, std::string program);
 };
 

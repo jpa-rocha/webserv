@@ -24,8 +24,12 @@ CGI& CGI::operator=(const CGI& obj)
 
 CGI::~CGI() {}
 
+std::string	CGI::get_response_body() 
+{
+	return this->_response_body;
+}
 
-int		CGI::handle_cgi(std::ostringstream &response_stream)
+int		CGI::handle_cgi()//std::ostringstream &response_stream)
 {
     std::ifstream file;
 	int fd[2];
@@ -48,7 +52,7 @@ int		CGI::handle_cgi(std::ostringstream &response_stream)
 		close(fd[1]);
 		// TODO some error checking - what to return?
 		std::cout << "DOES NOT EXIST" << std::endl;
-		(void) response_stream;
+		//response_stream;
 		//send_404(_config.get_root(), response_stream);
 		return EXIT_FAILURE;
 	}
