@@ -93,11 +93,11 @@ int ServerManager::run_servers()
 			}
 			else if (this->_fds[i].revents & POLLOUT)
 			{
-				std::cout << RED << "HERE" << RESET << std::endl;
-				std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
-				response_it->second.send_response();
-				if (response_it->second.response_complete())
-					this->_fds[i].events = POLLIN;
+				// std::cout << RED << "HERE" << RESET << std::endl;
+				// std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
+				// response_it->second.send_response();
+				// if (response_it->second.response_complete())
+				// 	this->_fds[i].events = POLLIN;
 			}
 			else if (this->_fds[i].revents & POLLIN)
 			{

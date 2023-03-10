@@ -78,31 +78,6 @@ int		CGI::handle_cgi()//std::ostringstream &response_stream)
 			_response_body += buff;
 		}
 		std::cout << _response_body << std::endl;
-		pos = _response_body.find('\n');
-		while (pos != std::string::npos)
-		{
-			_response_body.replace(pos, 1, "<br>");
-			pos = _response_body.find('\n', pos);
-		}
-		pos = _response_body.find('\n');
-		while (pos != std::string::npos)
-		{
-			_response_body.replace(pos, 1, "<br>");
-			pos = _response_body.find('\n', pos);
-		}
-		pos = _response_body.find(' ');
-		while (pos != std::string::npos)
-		{
-			_response_body.replace(pos, 1, "&nbsp;&nbsp;");
-			pos = _response_body.find(' ', pos);
-		}
-		pos = _response_body.find('\t');
-		while (pos != std::string::npos)
-		{
-			_response_body.replace(pos, 1, "&emsp;");
-			pos = _response_body.find('\t', pos);
-		}
-		_response_body.push_back('\0');
 		close(fd[0]);
     }
 	return EXIT_SUCCESS;
