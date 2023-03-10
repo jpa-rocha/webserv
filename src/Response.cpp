@@ -178,31 +178,6 @@ int		Response::handle_cgi(const std::string& path, std::string& response_body, s
 		while (read(fd[0], buff, sizeof(buff) - 1)) {
 			response_body += buff;
 		}
-		std::cout << response_body << std::endl;
-		pos = response_body.find('\n');
-		while (pos != std::string::npos)
-		{
-			response_body.replace(pos, 1, "<br>");
-			pos = response_body.find('\n', pos);
-		}
-		pos = response_body.find('\n');
-		while (pos != std::string::npos)
-		{
-			response_body.replace(pos, 1, "<br>");
-			pos = response_body.find('\n', pos);
-		}
-		pos = response_body.find(' ');
-		while (pos != std::string::npos)
-		{
-			response_body.replace(pos, 1, "&nbsp;&nbsp;");
-			pos = response_body.find(' ', pos);
-		}
-		pos = response_body.find('\t');
-		while (pos != std::string::npos)
-		{
-			response_body.replace(pos, 1, "&emsp;");
-			pos = response_body.find('\t', pos);
-		}
 		response_body.push_back('\0');
 		close(fd[0]);
     }
