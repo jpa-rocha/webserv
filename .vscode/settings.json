@@ -91,5 +91,6 @@
 		"valarray": "cpp",
 		"variant": "cpp",
 		"*.tpp": "cpp"
-	}
+	},
+	"C_Cpp.dimInactiveRegions": false
 }

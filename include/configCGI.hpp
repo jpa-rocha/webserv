@@ -1,5 +1,5 @@
-#ifndef CGI_HPP
-# define CGI_HPP
+#ifndef CONFIGCGI_HPP
+# define CONFIGCGI_HPP
 
 # include <string> 
 # include <vector>

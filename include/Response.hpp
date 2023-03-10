@@ -3,8 +3,7 @@
 
 # include "Utils.hpp"
 # include "MIME.hpp"
-# include <sstream>
-# include <sys/wait.h>
+# include "CGI.hpp"
 # include <cstring>
 # include "Config.hpp"
 # include "httpHeader.hpp"
