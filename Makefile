@@ -27,12 +27,13 @@ SRCDIR =		./src/
 SRCS	=	$(SRCDIR)Config.cpp			\
 			$(SRCDIR)ConfigParser.cpp	\
 			$(SRCDIR)Location.cpp		\
-			$(SRCDIR)configCGI.cpp			\
+			$(SRCDIR)configCGI.cpp		\
 			$(SRCDIR)httpHeader.cpp		\
 			$(SRCDIR)Server.cpp			\
 			$(SRCDIR)ServerManager.cpp	\
 			$(SRCDIR)Response.cpp		\
 			$(SRCDIR)MIME.cpp			\
+			$(SRCDIR)CGI.cpp			\
 			$(SRCDIR)minilib.cpp		\
 			$(SRCDIR)main.cpp			\
 

@@ -12,6 +12,7 @@
 #include <fstream> // streams for file operations
 #include <sstream> // constructs stringstream obj.s
 #include <sys/types.h>
+#include <sys/wait.h> // waitpid
 #include <poll.h> // definitions for the poll func.
 #include <errno.h>
 #include <arpa/inet.h> // for internet operations & struct in_addr
@@ -21,7 +22,7 @@
 #include "minilib.hpp" //our functions
 
 
-const int MAX_CONN = 5;
+const int MAX_CONN = 10000;
 extern int SWITCH;
 
 /*
