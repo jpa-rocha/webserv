@@ -50,10 +50,6 @@ int		CGI::handle_cgi()//std::ostringstream &response_stream)
 	if (file.fail() == true) {
 		close(fd[0]);
 		close(fd[1]);
-		// TODO some error checking - what to return?
-		std::cout << "DOES NOT EXIST" << std::endl;
-		//response_stream;
-		//send_404(_config.get_root(), response_stream);
 		return EXIT_FAILURE;
 	}
 	getline(file, shebang);
