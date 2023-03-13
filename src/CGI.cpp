@@ -37,22 +37,22 @@ void	CGI::env_init()
 	_env["SERVER_PROTOCOL"] = std::string("HTTP/1.1");//  The name and revision of the information protocol the request came in with.
 	_env["SERVER_PORT"] = to_string(_config.get_port()); //  The port number of the host on which the server is running.
 	_env["REQUEST_METHOD"] = _request.getMethod(); //  The method with which the information request was issued.
-	_env["PATH_INFO"] //Extra path information passed to a CGI program.
-	_env["PATH_TRANSLATED"] // The translated version of the path given by the variable PATH_INFO.
-	_env["SCRIPT_NAME"] // The virtual path (e.g., /cgi-bin/program.pl) of the script being executed.
-	_env["DOCUMENT_ROOT"] // The directory from which Web documents are served.
-	_env["QUERY_STRING"] // The query information passed to the program. It is appended to the URL with a "?".
-	_env["REMOTE_HOST"] // The remote hostname of the user making the request.
-	_env["REMOTE_ADDR"] // The remote IP address of the user making the request.
-	_env["AUTH_TYPE"] // The authentication method used to validate a user.
-	_env["REMOTE_USER"] // The authenticated name of the user.
-	_env["REMOTE_IDENT"] // The user making the request. This variable will only be set if NCSA IdentityCheck flag is enabled, and the client machine supports the RFC 931 identification scheme (ident daemon).
-	_env["CONTENT_TYPE"] // The MIME type of the query data, such as "text/html".
-	_env["CONTENT_LENGTH"] // The length of the data (in bytes or the number of characters) passed to the CGI program through standard input.
-	_env["HTTP_FROM"] // The email address of the user making the request. Most browsers do not support this variable.
-	_env["HTTP_ACCEPT"] // A list of the MIME types that the client can accept.
-	_env["HTTP_USER_AGENT"] // The browser the client is using to issue the request.
-	_env["HTTP_REFERER"] // The URL of the document that the client points to before accessing the CGI program.
+	_env["PATH_INFO"]; //Extra path information passed to a CGI program.
+	_env["PATH_TRANSLATED"]; // The translated version of the path given by the variable PATH_INFO.
+	_env["SCRIPT_NAME"]; // The virtual path (e.g., /cgi-bin/program.pl) of the script being executed.
+	_env["DOCUMENT_ROOT"]; // The directory from which Web documents are served.
+	_env["QUERY_STRING"]; // The query information passed to the program. It is appended to the URL with a "?".
+	_env["REMOTE_HOST"]; // The remote hostname of the user making the request.
+	_env["REMOTE_ADDR"]; // The remote IP address of the user making the request.
+	_env["AUTH_TYPE"]; // The authentication method used to validate a user.
+	_env["REMOTE_USER"]; // The authenticated name of the user.
+	_env["REMOTE_IDENT"]; // The user making the request. This variable will only be set if NCSA IdentityCheck flag is enabled, and the client machine supports the RFC 931 identification scheme (ident daemon).
+	_env["CONTENT_TYPE"]; // The MIME type of the query data, such as "text/html".
+	_env["CONTENT_LENGTH"]; // The length of the data (in bytes or the number of characters) passed to the CGI program through standard input.
+	_env["HTTP_FROM"]; // The email address of the user making the request. Most browsers do not support this variable.
+	_env["HTTP_ACCEPT"]; // A list of the MIME types that the client can accept.
+	_env["HTTP_USER_AGENT"]; // The browser the client is using to issue the request.
+	_env["HTTP_REFERER"]; // The URL of the document that the client points to before accessing the CGI program.
 }
 
 int		CGI::handle_cgi()//std::ostringstream &response_stream)
@@ -98,6 +98,7 @@ int		CGI::handle_cgi()//std::ostringstream &response_stream)
 		close(fd[1]);
 		waitpid(pid, NULL, 0);
 		while (read(fd[0], buff, sizeof(buff) - 1)) {
+			std::cout << "HERE" << std::endl;
 			_response_body += buff;
 			memset(buff, 0, 1000);
 		}

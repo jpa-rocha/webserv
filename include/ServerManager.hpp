@@ -12,7 +12,7 @@ class ServerManager {
 		std::vector<Server> _servers;
 		std::vector<Config> _configs;
 		std::map<int, Response> _responses;
-		size_t				_nfds;
+		int					_nfds;
 		struct pollfd*		_fds;
 		int					_nbr_fd_ready;
 		std::map<int, int>	_map_server_fd;

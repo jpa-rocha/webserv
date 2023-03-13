@@ -65,16 +65,16 @@ int ServerManager::run_servers()
 			perror("poll");
             return 1;
         }
-		int	current_size = this->_nfds;
-		for (int i = 0; i < current_size; i++)
+		std::cout << RED << (this->_fds[2].revents & POLLOUT) << RESET << std::endl;
+		for (int i = 0; i < this->_nfds; i++)
 		{
 			if (this->_fds[i].revents == 0)
 				continue ;
-			if (this->_fds[i].revents != POLLIN) {
-				std::cout << RED << "[ UNEXPECTED REVENTS VALUE ]" << RESET << std::endl;
-				nbr_fd_ready--;
-				continue ;
-			}
+			// if (this->_fds[i].revents != (POLLIN | POLLOUT)) {
+			// 	std::cout << RED << "[ UNEXPECTED REVENTS VALUE ]" << RESET << std::endl;
+			// 	nbr_fd_ready--;
+			// 	continue ;
+			// }
 			if (i < (int)this->get_servers().size())
 			{
 				int	connection_fd;
@@ -86,18 +86,16 @@ int ServerManager::run_servers()
 					nbr_fd_ready--;
 					continue ;
                 }
+				if (fcntl(connection_fd, F_SETFL, O_NONBLOCK) == -1)
+				{
+					perror("fcntl set_flags");
+					close(connection_fd);
+					continue ;
+				}
 				this->_fds[this->_nfds].fd = connection_fd;
 				this->_fds[this->_nfds].events = POLLIN;
 				this->_responses.insert(std::map<int, Response>::value_type(this->_fds[this->_nfds].fd, Response(this->_fds[this->_nfds].fd, this->_servers[i].get_sockfd(), this->_servers[i].get_config())));
 				this->_nfds++;
-			}
-			else if (this->_fds[i].revents & POLLOUT)
-			{
-				// std::cout << RED << "HERE" << RESET << std::endl;
-				// std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
-				// response_it->second.send_response();
-				// if (response_it->second.response_complete())
-				// 	this->_fds[i].events = POLLIN;
 			}
 			else if (this->_fds[i].revents & POLLIN)
 			{
@@ -114,7 +112,7 @@ int ServerManager::run_servers()
 					if (file_read == false)
 					{
 
-						received = recv(this->_fds[i].fd, buffer, sizeof(buffer), MSG_CTRUNC);
+						received = recv(this->_fds[i].fd, buffer, sizeof(buffer), MSG_CTRUNC | MSG_DONTWAIT);
 						if (received > this->_servers[it->second].get_config().get_client_max_body_size())
 						{
 							std::cout << "Client intended to send too large body." << std::endl;
@@ -146,10 +144,9 @@ int ServerManager::run_servers()
 					memset(buffer, 0, this->_servers[it->second].get_config().get_client_max_body_size());
 					std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
 					response_it->second.new_request(request);
-					this->_fds[i].events = POLLIN | POLLOUT;
 					response_it->second.send_response();
-					if (response_it->second.response_complete())
-						this->_fds[i].events = POLLIN;
+					if (!response_it->second.response_complete())
+						this->_fds[i].events = POLLIN | POLLOUT;
 				}
 				if (close_connection)
 				{
@@ -159,6 +156,14 @@ int ServerManager::run_servers()
 					compress_array = true;
 				}
 			}
+			if (this->_fds[i].revents & POLLOUT)
+			{
+				std::cout << RED << "POLLOUT EVENT" << RESET << std::endl;
+				std::map<int, Response>::iterator response_it = this->_responses.find(this->_fds[i].fd);
+				response_it->second.send_response();
+				if (response_it->second.response_complete())
+					this->_fds[i].events = POLLIN;
+			}
 			nbr_fd_ready--;
 			if (nbr_fd_ready == 0)
 				break ;
@@ -166,20 +171,18 @@ int ServerManager::run_servers()
 		if (compress_array)
 		{
 			compress_array = false;
-			for (size_t i = 2; i < this->_nfds; i++)
+			for (int i = 2; i < this->_nfds; i++)
 			{
 				if (this->_fds[i].fd == -1)
 				{
-					for (size_t j = this->_nfds - 1; j > i; j--)
+					for (int j = this->_nfds - 1; j > i; j--)
 					{
 						if (this->_fds[j].fd != -1)
 						{
 							this->_fds[i].fd = this->_fds[j].fd;
 							this->_fds[i].events = this->_fds[j].events;
-							this->_fds[i].revents = this->_fds[j].revents;
 							this->_fds[j].fd = -1;
-							this->_fds[j].events = 0;
-							this->_fds[j].revents = 0;	
+							this->_fds[j].events = 0;	
 							break ;
 						}
 					}
@@ -188,8 +191,10 @@ int ServerManager::run_servers()
 				}
 			}
 		}
+		for (int i = 0; i < this->_nfds; i++)
+			this->_fds[i].revents = 0;
     }
-	for (size_t i = 0; i < this->_nfds; i++)
+	for (int i = 0; i < this->_nfds; i++)
 	{
 		if (this->_fds[i].fd >= 0)
 		{

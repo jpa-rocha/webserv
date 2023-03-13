@@ -128,10 +128,10 @@ int    to_int(std::string str)
 
 std::string to_string(int num)
 {
-	int a = 10;
 	std::stringstream ss;
-	ss << a;
+	ss << num;
 	std::string str = ss.str();
+	return (str);
 }
 
 int			get_method_num(std::string method)

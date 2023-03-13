@@ -4,6 +4,7 @@ Response::Response(int conn_fd, int server_fd, Config& config): _config(config)
 {
     _conn_fd = conn_fd;
     _server_fd = server_fd;
+	_bytes_sent = 0;
 }
 
 Response::Response(const Response &src)
@@ -17,9 +18,9 @@ Response &Response::operator=(const Response &src)
 	{
 		_httpVersion = src._httpVersion;
 		_response_number = src._response_number;
-		_buff = src._buff;
         _conn_fd = src._conn_fd;
         _server_fd = src._server_fd;
+		_bytes_sent = src._bytes_sent;
 		_req_uri = src._req_uri;
 		_is_cgi = src._is_cgi;
         _types = src._types;
@@ -37,8 +38,9 @@ Response::~Response()
 
 }
 
-void 	Response::send_response()
+int 	Response::send_response()
 {
+	int	sent;
 	std::ostringstream response_stream;
 /* --------------------------------------------------------------------------- */
     //TODO get path function
@@ -90,9 +92,19 @@ void 	Response::send_response()
 	
 	// Send the response to the client
 	_response = response_stream.str();
-	if (send(this->_conn_fd, _response.c_str(), _response.length(), 0) < 0)
-    	std::cerr << RED << _RES_ERROR << RESET << std::endl;
-    file.close();    
+	std::cout << _response << std::endl;
+	sent = send(this->_conn_fd, _response.c_str(), _response.length(), MSG_DONTWAIT);
+    file.close();
+	if (sent > 0)
+	{
+		_bytes_sent += sent;
+		if (_bytes_sent == _response.length())
+		{
+			_response.clear();
+			_bytes_sent = 0;
+		}
+	}
+	return sent; 
 }
 
 void	Response::responseToGET(std::ifstream &file, const std::string& path, std::ostringstream &response_stream)
@@ -170,7 +182,7 @@ void	Response::new_request(httpHeader &request)
 
 bool	Response::response_complete() const
 {
-	if (_buff.empty())
+	if (_response.empty())
 		return true;
 	return false;
 }

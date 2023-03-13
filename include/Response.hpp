@@ -16,9 +16,9 @@ class Response
     private:
 		std::string                 _httpVersion;
 		std::string                 _response_number;
-		std::string					_buff;
         int                         _conn_fd;
         int                         _server_fd;
+		size_t						_bytes_sent;
 		std::string					_req_uri;
 		bool		                _is_cgi;
         MIME                        _types;
@@ -26,17 +26,17 @@ class Response
 		std::string			        _respond_path;
 		std::string			        _response;
 		Config      	   			_config;
+		httpHeader	 				_request;
     
         Response();
 
     public:
-		httpHeader	 				_request;
 		Response(int conn_fd, int server_fd, Config& config);
         Response(Response const &cpy);
         Response &operator=(Response const &rhs);
         ~Response();
 
-        void 	send_response();
+        int 	send_response();
 
         int		handle_cgi(const std::string& path, std::string& response_body, std::ostringstream &response_stream);
         void	exec_script(int *pipe, std::string path, std::string program);
