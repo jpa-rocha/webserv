@@ -5,18 +5,15 @@
 	 "email":"rick@gmail.com"
 	
 	},
-	
 	{
 		"id":2,
 		"name":"Glen",
 		"email":"glen@gmail.com"
 		
 	   },
-	
 	{
 		"id":3,
 		"name":"Negan",
 		"email":"negan@gmail.com"
-	   
 	   }
 	]
