@@ -171,7 +171,7 @@ void grim_reaper(int signum)
 	(void)signum;
 	pid = waitpid(-1, &status, WNOHANG);
 	if (pid > 0)
-		std::cout << GREEN << WIFEXITED(status) << RESET << std::endl;
+		std::cout << GREEN << WEXITSTATUS(status) << RESET << std::endl;
 }
 
 std::string clean_response_path(std::string response_path)
