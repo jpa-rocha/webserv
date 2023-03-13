@@ -136,7 +136,8 @@ void	Response::responseToGET(std::ifstream &file, const std::string& path, std::
 
 void	Response::responseToPOST(const httpHeader request, std::ostringstream &response_stream)
 {
-	CGI handler(this->_config, request.getUri(), _response_body);
+	// TODO change CGI constructor to accept httpheader instead of only URI
+	CGI handler(this->_config, request, _response_body);
 		if (handler.handle_cgi() == EXIT_SUCCESS)
 			response_stream << HTTPS_OK << _types.get_content_type(".html") << handler.get_response_body();
 		else

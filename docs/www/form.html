@@ -21,7 +21,7 @@
 
 			<div class="form-item">
 				<label for="Email">Email</label>
-				<input id="email" type="text" placeholder="Email" autocomplete="on"></input>
+				<input id="email" type="email" placeholder="Email" autocomplete="on"></input>
 			</div>
 
 			<div class="form-item">
@@ -33,7 +33,7 @@
 			</div>
 		</form>
 
-		<form id="form" action="../cgi-bin/upload.py" method="post">
+		<form id="form" action="../cgi-bin/upload.py" method="post" enctype="multipart/form-data">
 			<div class="form-item">
 				<input type="file" id="myFile" name="filename">
 			</div>
