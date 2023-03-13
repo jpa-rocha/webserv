@@ -162,6 +162,18 @@ void signal_callback_handler(int signum) {
 	(void) signum;
  	SWITCH = 0;
 }
+
+void grim_reaper(int signum)
+{
+	int	status;
+	int	pid;
+
+	(void)signum;
+	pid = waitpid(-1, &status, WNOHANG);
+	if (pid > 0)
+		std::cout << GREEN << WIFEXITED(status) << RESET << std::endl;
+}
+
 std::string clean_response_path(std::string response_path)
 {
 	if (response_path[0] == '/')

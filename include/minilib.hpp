@@ -16,6 +16,7 @@ std::string to_string(int num);
 bool 		check_def_format(std::string def, std::string line);
 int			get_method_num(std::string method);
 void 		signal_callback_handler(int signum);
+void		grim_reaper(int signum);
 std::string clean_response_path(std::string response_path);
 std::string	get_word(std::string line, int loc);
 

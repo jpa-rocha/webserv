@@ -92,7 +92,7 @@ int 	Response::send_response()
 	
 	// Send the response to the client
 	_response = response_stream.str();
-	std::cout << _response << std::endl;
+	//std::cout << _response << std::endl;
 	sent = send(this->_conn_fd, _response.c_str(), _response.length(), MSG_DONTWAIT);
     file.close();
 	if (sent > 0)

@@ -96,14 +96,12 @@ int		CGI::handle_cgi()//std::ostringstream &response_stream)
     else
     {
 		close(fd[1]);
-		waitpid(pid, NULL, 0);
+		//waitpid(pid, NULL, 0);
 		while (read(fd[0], buff, sizeof(buff) - 1)) {
-			std::cout << "HERE" << std::endl;
 			_response_body += buff;
 			memset(buff, 0, 1000);
 		}
 		close(fd[0]);
-		std::cout << _response_body << std::endl;
     }
 	return EXIT_SUCCESS;
 }
