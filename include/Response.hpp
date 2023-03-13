@@ -46,6 +46,7 @@ class Response
 		void	new_request(httpHeader &request);
 
 		void	responseToGET(std::ifstream &file, const std::string& path, std::ostringstream &response_stream);
+		void	responseToPOST(const std::string& path, std::ostringstream &response_stream);
 
 		bool	response_complete() const;
 };

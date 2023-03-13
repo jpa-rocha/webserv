@@ -78,7 +78,8 @@ void 	Response::send_response()
 		}
 		if (_request.getMethod() == POST)
 		{
-			response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A POST REQUEST";
+			responseToPOST(_request.getUri(), response_stream);
+			//response_stream << HTTPS_OK << _types.get_content_type(".html") << "THERE WAS A POST REQUEST";
 		}
 		if (_request.getMethod() == DELETE)
 		{
@@ -133,6 +134,14 @@ void	Response::responseToGET(std::ifstream &file, const std::string& path, std::
 	}
 }
 
+void	Response::responseToPOST(const std::string& path, std::ostringstream &response_stream)
+{
+	CGI handler(this->_config, path, _response_body);
+		if (handler.handle_cgi() == EXIT_SUCCESS)
+			response_stream << HTTPS_OK << _types.get_content_type(".html") << handler.get_response_body();
+		else
+			send_404(this->_config.get_root(), response_stream);
+}
 
 void 	Response::send_404(std::string root, std::ostringstream &response_stream)
 {
