@@ -138,7 +138,7 @@ void	Response::responseToGET(std::ifstream &file, const std::string& path, std::
 		response_stream << HTTPS_OK << _types.get_content_type(".png") << _response_body;
 	}
 	else if (_is_cgi == true) {
-		CGI handler(this->_config, path, _response_body);
+		CGI handler(this->_config, _request, _response_body);
 		if (handler.handle_cgi() == EXIT_SUCCESS)
 			response_stream << HTTPS_OK << _types.get_content_type(".html") << handler.get_response_body();
 		else
