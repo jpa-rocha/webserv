@@ -126,7 +126,13 @@ int    to_int(std::string str)
     return x;
 }
 
-
+std::string to_string(int num)
+{
+	int a = 10;
+	std::stringstream ss;
+	ss << a;
+	std::string str = ss.str();
+}
 
 int			get_method_num(std::string method)
 {

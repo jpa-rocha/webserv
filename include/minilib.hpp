@@ -12,6 +12,7 @@ std::string remove_end(std::string line, char symbol);
 std::string find_int(std::string line, int loc);
 std::string get_value(std::string line);
 int    		to_int(std::string str);
+std::string to_string(int num);
 bool 		check_def_format(std::string def, std::string line);
 int			get_method_num(std::string method);
 void 		signal_callback_handler(int signum);

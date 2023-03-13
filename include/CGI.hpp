@@ -6,19 +6,22 @@
 
 class CGI {
 	private:
-		std::string				_path;
-		std::string				_response_body;
-		Config					_config;
+		httpHeader							_request;
+		std::string							_response_body;
+		Config								_config;
+		char**								_exec_env;
+		std::map<std::string, std::string>	_env;
 		
 	public:
 		CGI(const CGI& obj);
-		CGI(Config config, const std::string path, std::string response_body);
+		CGI(Config config, httpHeader request, std::string response_body);
 		CGI& operator=(const CGI& obj);
 		~CGI();
 
 		// getters
 		std::string	get_response_body();
 
+		void	env_init();
 		int		handle_cgi();//std::ostringstream &response_stream);
 		void	exec_script(int *pipe, std::string path, std::string program);
 };
